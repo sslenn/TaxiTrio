@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-accent: #D4AF37;
+  --color-accent-rgb: 212, 175, 55;
+}
+
+body {
+  background-color: #0B0B0B;
+  color: #FFFFFF;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+}
+
+.font-serif {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+@layer components {
+  .btn-gold {
+    @apply bg-gold text-black font-semibold px-5 py-2 rounded-lg hover:opacity-90 transition;
+  }
+  .card {
+    @apply bg-card rounded-2xl p-6;
+  }
+  .input {
+    @apply w-full bg-[#1f1f1f] border border-[#2a2a2a] text-white rounded-lg px-4 py-2 focus:outline-none focus:border-gold;
+  }
+}
+
+/* Light theme overrides for high contrast black and white styling */
+body.light-theme {
+  background-color: #F3F4F6 !important; /* light grey off-white for beautiful container contrast */
+  color: #111111 !important;
+}
+
+/* Background overrides */
+body.light-theme .bg-\[\#0B0B0B\] { background-color: #F3F4F6 !important; } /* Page background */
+body.light-theme .bg-\[\#0E0E0E\] { background-color: #FFFFFF !important; border-right: 1px solid rgba(0, 0, 0, 0.15) !important; } /* Sidebar background */
+body.light-theme .bg-\[\#121212\] { 
+  background-color: #FFFFFF !important; 
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important; 
+} /* Card background */
+body.light-theme .bg-\[\#151515\] { 
+  background-color: #FFFFFF !important; 
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important; 
+} /* Card background */
+body.light-theme .bg-card { 
+  background-color: #FFFFFF !important; 
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+} /* Card background */
+body.light-theme .bg-\[\#1f1f1f\] { background-color: #E5E7EB !important; } /* Input backgrounds / dark panels */
+body.light-theme .bg-\[\#1a1a1a\] { background-color: #F3F4F6 !important; }
+body.light-theme .bg-black\/40 { background-color: rgba(255, 255, 255, 0.9) !important; }
+body.light-theme .bg-gold\/5 { background-color: rgba(var(--color-accent-light-rgb, 212, 175, 55), 0.04) !important; }
+body.light-theme .bg-gold\/10 { background-color: rgba(var(--color-accent-light-rgb, 212, 175, 55), 0.07) !important; }
+body.light-theme .bg-gold\/20 { background-color: rgba(var(--color-accent-light-rgb, 212, 175, 55), 0.12) !important; }
+
+/* Text overrides - High Contrast */
+body.light-theme .text-white { color: #111111 !important; }
+body.light-theme .text-gold { color: var(--color-accent-light, #111111) !important; }
+body.light-theme .text-\[\#D4AF37\] { color: var(--color-accent-light, #111111) !important; }
+body.light-theme .text-\[\#BFA76A\] { color: #1F2937 !important; font-weight: 700 !important; } /* Make muted gold text dark gray and bold */
+body.light-theme .text-muted { color: #374151 !important; }
+body.light-theme .text-\[\#A3A3A3\] { color: #374151 !important; } /* Dark charcoal for muted text */
+body.light-theme .text-\[\#555\] { color: #4B5563 !important; } /* High contrast slate for subtexts */
+body.light-theme .text-neutral-500 { color: #374151 !important; }
+body.light-theme .text-neutral-400 { color: #1F2937 !important; }
+body.light-theme .text-white\/95 { color: #111111 !important; }
+body.light-theme .text-gold\/50 { color: rgba(var(--color-accent-light-rgb, 212, 175, 55), 0.7) !important; } /* Make arrows/separators dark */
+
+/* Buttons */
+body.light-theme .bg-gold { 
+  background-color: var(--color-accent-light, #111111) !important; 
+  color: #FFFFFF !important; 
+}
+body.light-theme .hover\:bg-\[\#BFA76A\]:hover {
+  background-color: #000000 !important;
+}
+body.light-theme .text-black {
+  color: #FFFFFF !important;
+}
+body.light-theme .light-theme-toggle-btn {
+  background-color: #FFFFFF !important;
+  border-color: rgba(0, 0, 0, 0.2) !important;
+  color: var(--color-accent-light, #111111) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Border overrides - Darker and clearer borders */
+body.light-theme .border-gold\/10 { border-color: rgba(var(--color-accent-light-rgb, 212, 175, 55), 0.15) !important; }
+body.light-theme .border-gold\/15 { border-color: rgba(var(--color-accent-light-rgb, 212, 175, 55), 0.18) !important; }
+body.light-theme .border-gold\/20 { border-color: rgba(var(--color-accent-light-rgb, 212, 175, 55), 0.2) !important; }
+body.light-theme .border-gold\/25 { border-color: rgba(var(--color-accent-light-rgb, 212, 175, 55), 0.2) !important; }
+body.light-theme .border-gold\/30 { border-color: rgba(var(--color-accent-light-rgb, 212, 175, 55), 0.25) !important; }
+body.light-theme .border-gold\/40 { border-color: rgba(var(--color-accent-light-rgb, 212, 175, 55), 0.3) !important; }
+body.light-theme .border-gold\/50 { border-color: rgba(var(--color-accent-light-rgb, 212, 175, 55), 0.35) !important; }
+body.light-theme .border-gold\/60 { border-color: rgba(var(--color-accent-light-rgb, 212, 175, 55), 0.4) !important; }
+body.light-theme .border-neutral-800 { border-color: rgba(0, 0, 0, 0.15) !important; }
+body.light-theme .border-neutral-900 { border-color: rgba(0, 0, 0, 0.15) !important; }
+body.light-theme .border-neutral-900\/60 { border-color: rgba(0, 0, 0, 0.12) !important; }
+body.light-theme .border-\[\#2a2a2a\] { border-color: rgba(0, 0, 0, 0.2) !important; }
+body.light-theme .border-neutral-700 { border-color: rgba(0, 0, 0, 0.18) !important; }
+body.light-theme .divide-neutral-900\/60 > * { border-color: rgba(0, 0, 0, 0.12) !important; }
+body.light-theme .divide-neutral-900\/60 { border-color: rgba(0, 0, 0, 0.12) !important; }
+
+/* Interactive Hover States */
+body.light-theme .hover\:border-gold\/30:hover { border-color: rgba(0, 0, 0, 0.4) !important; }
+body.light-theme .hover\:border-gold\/45:hover { border-color: rgba(0, 0, 0, 0.45) !important; }
+body.light-theme .hover\:border-gold\/50:hover { border-color: rgba(0, 0, 0, 0.5) !important; }
+body.light-theme .hover\:border-gold\/60:hover { border-color: rgba(0, 0, 0, 0.6) !important; }
+body.light-theme .hover\:bg-neutral-900\/20:hover { background-color: rgba(0, 0, 0, 0.05) !important; }
+body.light-theme .hover\:bg-neutral-900\/40:hover { background-color: rgba(0, 0, 0, 0.08) !important; }
+body.light-theme .hover\:bg-neutral-900\/10:hover { background-color: rgba(0, 0, 0, 0.03) !important; }
+
+/* Inputs and Forms adaptation */
+body.light-theme input, 
+body.light-theme textarea, 
+body.light-theme select {
+  background-color: #FFFFFF !important;
+  color: #111111 !important;
+  border-color: rgba(0, 0, 0, 0.25) !important;
+  font-weight: 500 !important;
+}
+body.light-theme input:focus, 
+body.light-theme textarea:focus, 
+body.light-theme select:focus {
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 1px #000000 !important;
+}
+
+/* Hide background neon glow bubbles in Light Theme */
+body.light-theme .blur-3xl, 
+body.light-theme .blur-2xl, 
+body.light-theme .blur-xl {
+  display: none !important;
+}
+
+/* Clean High Contrast Map & Corner Clipping fixes */
+.leaflet-container {
+  background-color: #0B0B0B !important;
+}
+body.light-theme .leaflet-container {
+  background-color: #F3F4F6 !important;
+  filter: contrast(1.1) brightness(1.02);
+}
