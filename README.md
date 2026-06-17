@@ -205,25 +205,7 @@ TaxiTrio/
    ```bash
    cp .env.example .env # On Windows: copy .env.example .env
    ```
-3. Open `.env` and fill out your database settings:
-   ```env
-    PORT=5000
-    DB_HOST=localhost
-    DB_PORT=5432
-    DB_NAME=taxitrio
-    DB_USER=taxitrio_app
-    DB_PASSWORD=taxitrio_app_pass
-    JWT_ACCESS_SECRET=your_long_access_secret_here
-    JWT_REFRESH_SECRET=your_long_refresh_secret_here
-    JWT_ACCESS_EXPIRES_IN=20m
-    JWT_REFRESH_EXPIRES_IN=7d
-    
-    # Telegram Configuration (Alerts & Webhooks)
-    TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
-    TELEGRAM_CHAT_ID=your_telegram_chat_id_here
-    APP_URL=http://localhost:5000
-    ```
-4. Install package configurations and start development server:
+3. Install package configurations and start development server:
    ```bash
    npm install
    npm run dev
