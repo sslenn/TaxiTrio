@@ -25,6 +25,7 @@ CREATE TABLE users (
   role        user_role NOT NULL DEFAULT 'traveler',
   avatar_url  VARCHAR(500),
   is_active   BOOLEAN NOT NULL DEFAULT TRUE,
+  must_change_password BOOLEAN NOT NULL DEFAULT FALSE,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

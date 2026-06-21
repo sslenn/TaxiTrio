@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getUsers, toggleUser } from '../../service/adminService';
 import PageHeader from '../../components/PageHeader';
 import DataTable from '../../components/DataTable';
 import StatusBadge from '../../components/StatusBadge';
 
 export default function ManageUsers() {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -90,16 +92,24 @@ export default function ManageUsers() {
                 <StatusBadge status={u.is_active ? 'active' : 'inactive'} />
               </td>
               <td className="px-6 py-4">
-                <button 
-                  onClick={() => handleToggle(u.id)}
-                  className={`text-[10px] font-bold uppercase tracking-wider transition px-3 py-1.5 rounded-xl border ${
-                    u.is_active 
-                      ? 'text-rose-500 border-rose-500/25 bg-rose-500/5 hover:bg-rose-500/10 hover:border-rose-500/50' 
-                      : 'text-emerald-500 border-emerald-500/25 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/50'
-                  }`}
-                >
-                  {u.is_active ? 'Deactivate' : 'Activate'}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => navigate(`/admin/users/${u.id}`)}
+                    className="text-[10px] font-bold uppercase tracking-wider transition px-3 py-1.5 rounded-xl border border-gold/20 text-gold bg-gold/5 hover:bg-gold/10 hover:border-gold/50 cursor-pointer"
+                  >
+                    Details
+                  </button>
+                  <button 
+                    onClick={() => handleToggle(u.id)}
+                    className={`text-[10px] font-bold uppercase tracking-wider transition px-3 py-1.5 rounded-xl border ${
+                      u.is_active 
+                        ? 'text-rose-500 border-rose-500/25 bg-rose-500/5 hover:bg-rose-500/10 hover:border-rose-500/50' 
+                        : 'text-emerald-500 border-emerald-500/25 bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/50'
+                    }`}
+                  >
+                    {u.is_active ? 'Deactivate' : 'Activate'}
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

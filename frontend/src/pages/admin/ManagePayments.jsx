@@ -35,7 +35,7 @@ export default function ManagePayments() {
     <div className="flex flex-col gap-6 max-w-4xl mx-auto">
       <PageHeader 
         title="Verify Payments" 
-        subtitle="Review uploaded Bakong/KHQR receipts and manual bank slip transactions"
+        subtitle="Review and track card transactions, digital receipts, and payment logs"
       >
         <div className="relative w-64 shrink-0">
           <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-neutral-500">
@@ -53,20 +53,59 @@ export default function ManagePayments() {
         </div>
       </PageHeader>
 
-      {/* Image Preview Modal */}
+      {/* Digital Receipt/Proof Modal */}
       {preview && (
         <div
           className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setPreview(null)}
         >
-          <div className="relative max-w-xl w-full" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-w-md w-full bg-[#121212] border border-gold/15 p-6 rounded-2xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setPreview(null)}
               className="absolute -top-10 right-0 text-white text-sm hover:text-gold flex items-center gap-1 font-bold uppercase tracking-wider transition"
             >
               ✕ Close
             </button>
-            <img src={preview} alt="Payment proof" className="w-full rounded-2xl border border-gold/20 shadow-2xl" />
+            {typeof preview === 'string' && !preview.includes('stripe') && !preview.includes('mock') ? (
+              <img src={preview} alt="Payment proof" className="w-full rounded-2xl border border-gold/20 shadow-2xl" />
+            ) : (
+              <div className="flex flex-col gap-4 text-center font-sans">
+                <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-3xl font-bold">✓</div>
+                <h3 className="text-xl font-bold text-white font-serif">Payment Receipt</h3>
+                <p className="text-neutral-500 text-[10px] uppercase tracking-widest font-semibold">
+                  {typeof preview === 'object' && preview.payment_method === 'Stripe' ? 'Stripe Card Settlement' : 'KHQR Payment Receipt'}
+                </p>
+                <div className="border-t border-b border-neutral-900/60 py-4 my-2 text-left text-xs flex flex-col gap-2.5 text-[#A3A3A3] font-light">
+                  <div className="flex justify-between">
+                    <span>Transaction Reference:</span>
+                    <span className="text-white font-semibold">#{typeof preview === 'object' ? preview.id : 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Customer Name:</span>
+                    <span className="text-white font-semibold">{typeof preview === 'object' ? (preview.traveler?.full_name || preview.traveler_name || 'Traveler') : 'Traveler'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Payment Method:</span>
+                    <span className="text-white font-semibold">
+                      {typeof preview === 'object' ? preview.payment_method : 'Credit Card (Stripe)'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Amount Transferred:</span>
+                    <span className="text-gold font-bold text-sm">${typeof preview === 'object' ? preview.amount : '0.00'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Settlement Date:</span>
+                    <span className="text-white font-medium">
+                      {typeof preview === 'object' ? new Date(preview.created_at || preview.createdAt || Date.now()).toLocaleString() : 'N/A'}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 py-2.5 rounded-xl uppercase font-bold tracking-wider">
+                  Payment Confirmed & Verified
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -89,9 +128,20 @@ export default function ManagePayments() {
               className="card border border-gold/15 bg-[#121212] p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-gold/30 transition duration-300 relative overflow-hidden"
             >
               <div className="flex gap-4 items-start relative z-10 flex-1">
-                {/* Proof image thumbnail */}
+                {/* Proof image thumbnail / Receipt Icon */}
                 <div className="shrink-0">
-                  {p.proof_url ? (
+                  {p.payment_method === 'Stripe' || (p.proof_url && (p.proof_url.includes('stripe') || p.proof_url.includes('mock'))) ? (
+                    <div 
+                      className="w-16 h-16 rounded-xl border border-indigo-500/20 bg-indigo-500/5 hover:border-indigo-500 hover:bg-indigo-500/10 flex flex-col items-center justify-center text-indigo-400 text-[9px] font-bold uppercase tracking-wider cursor-pointer transition duration-300 shadow-md"
+                      onClick={() => setPreview(p)}
+                      title="Click to view digital receipt"
+                    >
+                      <svg className="w-6 h-6 mb-1 text-indigo-400" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 17H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V7h12v2zM3 5v16a1 1 0 001 1h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1z"/>
+                      </svg>
+                      Receipt
+                    </div>
+                  ) : p.proof_url ? (
                     <img
                       src={p.proof_url}
                       alt="Payment proof"

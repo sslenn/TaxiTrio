@@ -29,4 +29,18 @@ const getAllDrivers = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
-module.exports = { getAllUsers, updateProfile, toggleUserStatus, getAllDrivers };
+const createDriverShell = async (req, res, next) => {
+  try {
+    const data = await userService.createDriverShell(req.body);
+    res.status(201).json(successResponse('Driver profile created and invitation sent', data));
+  } catch (e) { next(e); }
+};
+
+const getUserDetails = async (req, res, next) => {
+  try {
+    const data = await userService.getUserDetails(req.params.id);
+    res.json(successResponse('User details fetched', data));
+  } catch (e) { next(e); }
+};
+
+module.exports = { getAllUsers, updateProfile, toggleUserStatus, getAllDrivers, createDriverShell, getUserDetails };

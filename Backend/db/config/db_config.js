@@ -4,9 +4,9 @@ const { Sequelize } = require('sequelize');
 let sequelize;
 
 if (process.env.DATABASE_URL) {
-  // If connection string is provided (e.g. for Supabase, Render, Heroku)
-  const isSupabase = process.env.DATABASE_URL.includes('supabase');
-  const useSSL = process.env.DB_SSL === 'true' || isSupabase;
+  // If connection string is provided (e.g. for Supabase, Neon, Render, Heroku)
+  const isLocal = process.env.DATABASE_URL.includes('localhost') || process.env.DATABASE_URL.includes('127.0.0.1');
+  const useSSL = process.env.DB_SSL === 'true' || (process.env.DB_SSL !== 'false' && !isLocal);
 
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',

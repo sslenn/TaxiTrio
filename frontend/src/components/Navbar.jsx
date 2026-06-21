@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { getUser, logout } from '../utils/auth';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const user = getUser();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     logout();
@@ -43,34 +45,28 @@ export default function Navbar() {
       {/* Center navigation links */}
       <div className="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-widest text-[#A3A3A3]">
         <button 
-          onClick={() => handleNavClick('/traveler/services')} 
+          onClick={() => handleNavClick('/traveler/book/city')} 
           className="hover:text-[#D4AF37] transition duration-200 uppercase tracking-widest font-semibold bg-transparent border-none p-0 cursor-pointer text-[#A3A3A3]"
         >
-          Fleet
-        </button>
-        <button 
-          onClick={() => handleNavClick('/traveler/book/package')} 
-          className="hover:text-[#D4AF37] transition duration-200 uppercase tracking-widest font-semibold bg-transparent border-none p-0 cursor-pointer text-[#A3A3A3]"
-        >
-          Private Tours
+          {t('cityRide')}
         </button>
         <button 
           onClick={() => handleNavClick('/traveler/book/intercity')} 
           className="hover:text-[#D4AF37] transition duration-200 uppercase tracking-widest font-semibold bg-transparent border-none p-0 cursor-pointer text-[#A3A3A3]"
         >
-          Intercity
+          {t('intercity')}
+        </button>
+        <button 
+          onClick={() => handleNavClick('/traveler/book/package')} 
+          className="hover:text-[#D4AF37] transition duration-200 uppercase tracking-widest font-semibold bg-transparent border-none p-0 cursor-pointer text-[#A3A3A3]"
+        >
+          {t('tours')}
         </button>
         <button 
           onClick={() => handleNavClick('/traveler/custom-trip')} 
           className="hover:text-[#D4AF37] transition duration-200 uppercase tracking-widest font-semibold bg-transparent border-none p-0 cursor-pointer text-[#A3A3A3]"
         >
-          Corporate
-        </button>
-        <button 
-          onClick={() => handleNavClick('/traveler/profile')} 
-          className="hover:text-[#D4AF37] transition duration-200 uppercase tracking-widest font-semibold bg-transparent border-none p-0 cursor-pointer text-[#A3A3A3]"
-        >
-          Support
+          {t('customTrip')}
         </button>
       </div>
 
@@ -82,13 +78,13 @@ export default function Navbar() {
               onClick={() => navigate(user.role === 'admin' ? '/admin' : user.role === 'driver' ? '/driver' : '/traveler')}
               className="text-[#D4AF37] border border-[#D4AF37]/30 hover:border-[#D4AF37] px-4 md:px-5 py-2 rounded-full font-semibold transition duration-200 uppercase tracking-wider"
             >
-              Dashboard
+              {t('dashboard')}
             </button>
             <button 
               onClick={handleLogout}
               className="text-[#A3A3A3] hover:text-red-400 font-semibold transition duration-200 uppercase tracking-wider"
             >
-              Log Out
+              {t('logout')}
             </button>
           </>
         ) : (
@@ -97,13 +93,13 @@ export default function Navbar() {
               onClick={() => navigate('/login')}
               className="text-[#FFFFFF] hover:text-[#D4AF37] px-3 py-2 font-semibold transition duration-200 uppercase tracking-wider"
             >
-              Sign In
+              {t('login')}
             </button>
             <button 
               onClick={handleBookNow}
               className="bg-[#D4AF37] hover:bg-[#BFA76A] text-black px-5 md:px-6 py-2.5 rounded-full font-bold transition duration-200 shadow-lg shadow-[#D4AF37]/10 uppercase tracking-wider"
             >
-              Book Now
+              {t('bookNow')}
             </button>
           </>
         )}

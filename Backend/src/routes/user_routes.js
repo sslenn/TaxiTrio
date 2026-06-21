@@ -31,5 +31,7 @@ router.patch('/profile', authenticate, upload.single('avatar'), (req, res, next)
 
 router.get('/admin/users', authenticate, authorize('admin'), ctrl.getAllUsers);
 router.patch('/admin/users/:id/toggle', authenticate, authorize('admin'), ctrl.toggleUserStatus);
+router.post('/admin/drivers', authenticate, authorize('admin'), ctrl.createDriverShell);
+router.get('/admin/users/:id/details', authenticate, authorize('admin'), ctrl.getUserDetails);
 
 module.exports = router;

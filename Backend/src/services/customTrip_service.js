@@ -1,4 +1,4 @@
-const { CustomTripRequest, User, Notification } = require('../../models');
+const { CustomTripRequest, User, Notification, Booking, BookingStatusHistory } = require('../../models');
 
 const create = async (travelerId, data) => {
   const existingPending = await CustomTripRequest.findOne({
@@ -49,11 +49,44 @@ const getMyRequests = async (travelerId) =>
 const confirmRequest = async (id, travelerId, { traveler_response, telegram_contact, origin, destination, travel_date, travel_time }) => {
   const req = await CustomTripRequest.findOne({ where: { id, traveler_id: travelerId } });
   if (!req) throw { status: 404, message: 'Request not found' };
-  if (req.telegram_contact || req.traveler_response) {
-    throw { status: 400, message: 'Details have already been confirmed for this trip request.' };
+  if (req.status !== 'approved') {
+    throw { status: 400, message: 'Can only confirm details for approved trip requests.' };
   }
+
+  let pickupTime = null;
+  if (travel_date && travel_time) {
+    pickupTime = new Date(`${travel_date}T${travel_time}`);
+  }
+
+  // Create a new Booking in 'pending_payment' status
+  const booking = await Booking.create({
+    traveler_id: travelerId,
+    booking_type: 'intercity',
+    status: 'pending_payment',
+    pickup_location: origin,
+    dropoff_location: destination,
+    pickup_time: pickupTime,
+    total_fare: req.quoted_price,
+    notes: traveler_response || `Bespoke Custom Trip Request #${req.id}`
+  });
+
+  await BookingStatusHistory.create({
+    booking_id: booking.id,
+    status: 'pending_payment',
+    changed_by: travelerId
+  });
+
+  // Generate Stripe Checkout Session URL immediately for this booking
+  const paymentService = require('./payment_service');
+  const sessionRes = await paymentService.createStripeSession(travelerId, booking.id);
+
   await req.update({ traveler_response, telegram_contact, origin, destination, travel_date, travel_time });
-  return req;
+  
+  return {
+    customTrip: req,
+    bookingId: booking.id,
+    sessionUrl: sessionRes.sessionUrl
+  };
 };
 
 const markUrgent = async (id, travelerId) => {

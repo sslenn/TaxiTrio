@@ -1,4 +1,4 @@
-const { fn, col, literal, Op } = require('sequelize');
+const { fn, col, literal, Op, cast } = require('sequelize');
 const { Booking, User, Review, sequelize } = require('../../models');
 
 const getStats = async () => {
@@ -19,25 +19,39 @@ const getStats = async () => {
       ],
       raw: true,
     }),
-    sequelize.query(
-      `SELECT DATE_TRUNC('month', created_at) AS month,
-              COALESCE(SUM(total_fare), 0) AS total_revenue
-       FROM bookings WHERE status = 'completed'
-       GROUP BY 1 ORDER BY 1 DESC LIMIT 12`,
-      { type: sequelize.QueryTypes.SELECT }
-    ),
-    sequelize.query(
-      `SELECT u.id, u.full_name,
-              ROUND(AVG(r.rating)::numeric, 2) AS avg_rating,
-              COUNT(r.id) AS reviews
-       FROM users u
-       JOIN reviews r ON u.id = r.driver_id
-       WHERE u.role = 'driver'
-       GROUP BY u.id, u.full_name
-       ORDER BY avg_rating DESC NULLS LAST
-       LIMIT 5`,
-      { type: sequelize.QueryTypes.SELECT }
-    ),
+    Booking.findAll({
+      attributes: [
+        [fn('DATE_TRUNC', 'month', col('created_at')), 'month'],
+        [fn('COALESCE', fn('SUM', col('total_fare')), 0), 'total_revenue'],
+      ],
+      where: { status: 'completed' },
+      group: [fn('DATE_TRUNC', 'month', col('created_at'))],
+      order: [[fn('DATE_TRUNC', 'month', col('created_at')), 'DESC']],
+      limit: 12,
+      raw: true,
+    }),
+    User.findAll({
+      attributes: [
+        'id',
+        'full_name',
+        [fn('ROUND', cast(fn('AVG', col('driverReviews.rating')), 'numeric'), 2), 'avg_rating'],
+        [fn('COUNT', col('driverReviews.id')), 'reviews'],
+      ],
+      include: [
+        {
+          model: Review,
+          as: 'driverReviews',
+          attributes: [],
+          required: true,
+        },
+      ],
+      where: { role: 'driver' },
+      group: ['User.id', 'User.full_name'],
+      order: [[literal('avg_rating'), 'DESC NULLS LAST']],
+      limit: 5,
+      subQuery: false,
+      raw: true,
+    }),
   ]);
 
   return { bookings: bookingStats, users: userStats, monthly_revenue: monthlyRevenue, top_drivers: topDrivers };

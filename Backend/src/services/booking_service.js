@@ -211,6 +211,12 @@ const autoDispatch = async (bookingId) => {
       message: `You have been assigned to a new booking (${booking.booking_type}) from ${booking.pickup_location} to ${booking.dropoff_location}.`
     });
 
+    await Notification.create({
+      user_id: booking.traveler_id,
+      title: 'Driver Assigned',
+      message: `A driver has been assigned to your ride #${booking.id} (${booking.booking_type.replace(/_/g, ' ').toUpperCase()}).`
+    });
+
     console.log(`Booking ${bookingId} auto-assigned to driver ${vehicle.driver_id}`);
     return booking;
   } else {
@@ -226,6 +232,43 @@ const updateDriverStatus = async (bookingId, driverId, status) => {
   if (!booking) throw { status: 404, message: 'Booking not found' };
   await booking.update({ status });
   await BookingStatusHistory.create({ booking_id: bookingId, status, changed_by: driverId });
+
+  // Notify traveler of driver status transitions
+  try {
+    if (status === 'accepted') {
+      await Notification.create({
+        user_id: booking.traveler_id,
+        title: 'Driver Accepted Ride',
+        message: `Your driver has accepted your ride #${bookingId}.`
+      });
+    } else if (status === 'en_route') {
+      await Notification.create({
+        user_id: booking.traveler_id,
+        title: 'Driver En Route',
+        message: `Your driver is en route to your pickup location.`
+      });
+    } else if (status === 'arrived') {
+      await Notification.create({
+        user_id: booking.traveler_id,
+        title: 'Driver Arrived',
+        message: `Your driver has arrived at the pickup location.`
+      });
+    } else if (status === 'in_progress') {
+      await Notification.create({
+        user_id: booking.traveler_id,
+        title: 'Trip Started',
+        message: `Your ride #${bookingId} has started. Have a safe journey!`
+      });
+    } else if (status === 'completed') {
+      await Notification.create({
+        user_id: booking.traveler_id,
+        title: 'Trip Completed',
+        message: `Your ride #${bookingId} is complete. Please rate your driver!`
+      });
+    }
+  } catch (notifyErr) {
+    console.error('Failed to notify traveler of driver status update:', notifyErr);
+  }
 
   if (status === 'rejected') {
     const driver = await User.findByPk(driverId);

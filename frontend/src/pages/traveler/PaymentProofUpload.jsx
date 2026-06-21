@@ -1,23 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { createPayment, getCheckoutSession, simulateKHQRPayment } from '../../service/paymentService';
+import { getCheckoutSession, createStripeSession } from '../../service/paymentService';
 import { cancelBooking } from '../../service/bookingService';
 import PageHeader from '../../components/PageHeader';
 import GoldButton from '../../components/GoldButton';
-import DashboardCard from '../../components/DashboardCard';
-
-const METHODS = ['ABA Bank', 'ACLEDA Bank', 'Wing', 'Pi Pay', 'Cash', 'Other'];
 
 export default function PaymentProofUpload() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
   const [checkout, setCheckout] = useState(null);
-  const [method, setMethod] = useState('');
-  const [file, setFile] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [simulating, setSimulating] = useState(false);
-  const [showManual, setShowManual] = useState(false);
+  const [stripeLoading, setStripeLoading] = useState(false);
 
   useEffect(() => {
     getCheckoutSession(bookingId)
@@ -25,35 +19,19 @@ export default function PaymentProofUpload() {
       .catch((err) => setError(err.response?.data?.message || 'Failed to load checkout details'));
   }, [bookingId]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!file) return setError('Please select a proof image');
-    setLoading(true);
-    setError('');
-    const fd = new FormData();
-    fd.append('booking_id', bookingId);
-    fd.append('payment_method', method);
-    fd.append('proof', file);
-    try {
-      await createPayment(fd);
-      navigate('/traveler/bookings');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Upload failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSimulatePay = async () => {
-    setSimulating(true);
+  const handleStripePay = async () => {
+    setStripeLoading(true);
     setError('');
     try {
-      await simulateKHQRPayment(bookingId);
-      navigate(`/traveler/bookings/${bookingId}`);
+      const { data } = await createStripeSession(bookingId);
+      if (data && data.data && data.data.sessionUrl) {
+        window.location.href = data.data.sessionUrl;
+      } else {
+        throw new Error('Failed to retrieve checkout URL');
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Simulation failed');
-    } finally {
-      setSimulating(false);
+      setError(err.response?.data?.message || 'Stripe initialization failed');
+      setStripeLoading(false);
     }
   };
 
@@ -66,13 +44,18 @@ export default function PaymentProofUpload() {
       navigate('/traveler/bookings');
     } catch (err) {
       setError(err.response?.data?.message || 'Cancel failed');
+      setStripeLoading(false);
     } finally {
       setLoading(false);
     }
   };
 
   if (error && !checkout) {
-    return <div className="max-w-md mx-auto text-red-400 p-4 bg-red-950/20 border border-red-900/40 rounded-xl mt-12 text-center text-sm">{error}</div>;
+    return (
+      <div className="max-w-md mx-auto text-red-400 p-4 bg-red-950/20 border border-red-900/40 rounded-xl mt-12 text-center text-sm">
+        {error}
+      </div>
+    );
   }
 
   if (!checkout) {
@@ -95,63 +78,52 @@ export default function PaymentProofUpload() {
       
       {error && <p className="text-red-400 text-sm bg-red-950/20 border border-red-900/40 p-4 rounded-xl">{error}</p>}
 
-      {/* KHQR Checkout Card */}
-      <div className="card border border-gold/15 bg-[#121212] p-6 flex flex-col items-center gap-5 rounded-2xl shadow-2xl relative overflow-hidden">
-        <div className="absolute -right-24 -top-24 w-48 h-48 rounded-full bg-red-500/5 blur-3xl"></div>
+      {/* Stripe Payment Card */}
+      <div className="card border border-gold/15 bg-[#121212] p-6 flex flex-col items-center gap-6 rounded-2xl shadow-2xl relative overflow-hidden">
+        <div className="absolute -right-24 -top-24 w-48 h-48 rounded-full bg-indigo-500/5 blur-3xl pointer-events-none"></div>
         
-        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 z-10">
-          <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400">KHQR / Bakong Pay</span>
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 z-10">
+          <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">Secure Card Checkout</span>
         </div>
 
-        {/* Mock KHQR Box */}
-        <div className="relative bg-white p-6 rounded-2xl shadow-xl border border-neutral-200 flex flex-col items-center justify-center w-60 h-60 z-10">
-          <svg className="w-44 h-44 text-neutral-900" viewBox="0 0 100 100" fill="currentColor">
-            <path d="M0 0h30v30H0zm10 10h10v10H10zm60-10h30v30H70zm10 10h10v10H80zM0 70h30v30H0zm10 10h10v10H10z" />
-            <path d="M40 10h10v10H40zm10 20h10v10H50zm10-10h10v10H60zm-20 20h10v10H40zm20 10h10v10H60zm10-10h10v10H70zm-20 20h10v10H50zm30 0h10v10H80zm0-20h10v10H80zm-40 20h10v10H40zM35 35h30v30H35z" fill="#f43f5e" opacity="0.1" />
-            <path d="M35 45h5v5h-5zm10-5h5v5h-5zm10 15h5v5h-5zm-5 5h5v5h-5zm-15-5h5v5h-5zm20-10h5v5h-5z" />
-            <path d="M5 35h5v10H5zm5 15h10v5H10zm20 5h5v5h-5zM85 35h5v15h-5zm-5 20h10v5H80z" />
-          </svg>
-          <div className="absolute inset-0 m-auto w-11 h-11 rounded-xl bg-rose-600 flex items-center justify-center shadow-lg border-2 border-white">
-            <span className="text-white text-[10px] font-black tracking-tighter">KHQR</span>
-          </div>
-        </div>
-
-        <div className="text-center z-10">
+        <div className="text-center z-10 my-2">
           <p className="text-[#A3A3A3] text-[10px] uppercase tracking-widest font-semibold">Amount to Pay</p>
-          <p className="text-3xl font-extrabold text-gold mt-1">${parseFloat(payment.amount).toFixed(2)}</p>
+          <p className="text-4xl font-extrabold text-gold mt-1">${parseFloat(payment.amount).toFixed(2)}</p>
         </div>
 
-        <div className="w-full border-t border-neutral-900 my-1 pt-4 text-xs flex flex-col gap-2.5 text-left text-[#A3A3A3] z-10 font-light">
+        <div className="w-full border-t border-neutral-900 my-1 pt-4 text-xs flex flex-col gap-3 text-left text-[#A3A3A3] z-10 font-light font-sans">
           <div className="flex justify-between items-center">
             <span>Trip Type:</span>
             <span className="capitalize text-white font-bold font-serif">{booking_type?.replace(/_/g, ' ')}</span>
           </div>
           <div className="flex justify-between items-start gap-4">
             <span className="shrink-0">Route:</span>
-            <span className="text-white font-medium truncate max-w-[220px]">{pickup_location} → {dropoff_location}</span>
+            <span className="text-white font-medium text-right max-w-[220px] line-clamp-2">{pickup_location} → {dropoff_location}</span>
           </div>
         </div>
 
-        <GoldButton
-          onClick={handleSimulatePay}
-          disabled={simulating}
-          className="w-full py-3.5 z-10 mt-1"
+        {/* Stripe Card Payment Option */}
+        <button
+          type="button"
+          onClick={handleStripePay}
+          disabled={stripeLoading}
+          className="w-full py-4 z-10 mt-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition duration-300 shadow-md flex items-center justify-center gap-2.5 disabled:opacity-50 active:scale-[0.98]"
         >
-          {simulating ? (
+          {stripeLoading ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
-              Verifying Simulation...
+              <span className="w-4.5 h-4.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              Redirecting to Stripe...
             </span>
           ) : (
-            'Simulate KHQR Payment (Pay Now)'
+            <>
+              <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+              </svg>
+              Pay with Card (Stripe)
+            </>
           )}
-        </GoldButton>
-
-        <p className="text-[#A3A3A3] text-[10px] text-center flex items-center justify-center gap-2 z-10 mt-1 font-semibold uppercase tracking-wider">
-          <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
-          Waiting for Bakong API confirmation...
-        </p>
+        </button>
 
         <div className="w-full flex flex-col gap-2.5 mt-2 pt-4 border-t border-neutral-900 z-10">
           <button
@@ -170,52 +142,6 @@ export default function PaymentProofUpload() {
             {loading ? 'Cancelling...' : 'Cancel Booking'}
           </button>
         </div>
-      </div>
-
-      {/* Manual Upload Section */}
-      <div className="text-center">
-        <button
-          onClick={() => setShowManual(!showManual)}
-          className="text-xs text-[#BFA76A] hover:text-gold transition underline uppercase tracking-widest font-semibold"
-        >
-          {showManual ? 'Hide manual options' : 'Or pay manually and upload receipt'}
-        </button>
-
-        {showManual && (
-          <div className="mt-4 animate-in slide-in-from-top-4 duration-300">
-            <form onSubmit={handleSubmit} className="card flex flex-col gap-5 text-left border border-gold/15 bg-[#121212] p-6 rounded-2xl shadow-xl">
-              <h3 className="font-bold text-sm text-gold font-serif border-b border-neutral-900 pb-3 uppercase tracking-wider">Manual Bank Receipt Upload</h3>
-              
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] uppercase font-bold text-[#BFA76A] tracking-wider block">Payment Provider</label>
-                <select 
-                  className="w-full bg-[#0B0B0B] border border-gold/15 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold/60 transition duration-300" 
-                  required 
-                  value={method} 
-                  onChange={(e) => setMethod(e.target.value)}
-                >
-                  <option value="">Select payment method</option>
-                  {METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
-                </select>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] uppercase font-bold text-[#BFA76A] tracking-wider block">Upload Receipt Image</label>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  required 
-                  className="text-white text-xs block w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border file:border-gold/20 file:text-xs file:font-semibold file:bg-transparent file:text-gold hover:file:bg-gold hover:file:text-black hover:file:border-gold file:cursor-pointer transition-all duration-300"
-                  onChange={(e) => setFile(e.target.files[0])} 
-                />
-              </div>
-
-              <GoldButton type="submit" disabled={loading} className="w-full py-3">
-                {loading ? 'Uploading Receipt...' : 'Submit Payment Proof'}
-              </GoldButton>
-            </form>
-          </div>
-        )}
       </div>
     </div>
   );

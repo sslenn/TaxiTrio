@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { getToken, getUser } from '../utils/auth';
 
+// 1. Verification of Login Status (Authentication)
 const ProtectedRoute = ({ children, roles }) => {
   const token = getToken();
   const user = getUser();

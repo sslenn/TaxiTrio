@@ -1,6 +1,8 @@
-export const getToken = () => localStorage.getItem('taxitrio_token');
-export const setToken = (t) => localStorage.setItem('taxitrio_token', t);
-export const removeToken = () => localStorage.removeItem('taxitrio_token');
+let inMemoryToken = null;
+
+export const getToken = () => inMemoryToken;
+export const setToken = (t) => { inMemoryToken = t; };
+export const removeToken = () => { inMemoryToken = null; };
 
 export const getUser = () => {
   const raw = localStorage.getItem('taxitrio_user');

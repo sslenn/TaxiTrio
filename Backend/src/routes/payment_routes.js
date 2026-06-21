@@ -28,6 +28,9 @@ router.post('/payments', authenticate, authorize('traveler'), upload.single('pro
 }, ctrl.create);
 
 router.get('/payments/checkout/:bookingId', authenticate, authorize('traveler'), ctrl.getCheckout);
+router.get('/payments/checkout/:bookingId/status', authenticate, authorize('traveler'), ctrl.getStatus);
+router.post('/payments/checkout/:bookingId/stripe', authenticate, authorize('traveler'), ctrl.createStripeSession);
+router.post('/payments/checkout/:bookingId/stripe-verify', authenticate, authorize('traveler'), ctrl.verifyStripePayment);
 router.post('/payments/:bookingId/simulate-khqr-pay', authenticate, authorize('traveler'), ctrl.simulateKHQR);
 
 router.get('/admin/payments', authenticate, authorize('admin'), ctrl.getAll);

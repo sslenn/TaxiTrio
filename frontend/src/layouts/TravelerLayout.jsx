@@ -2,6 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { logout, getUser } from '../utils/auth';
 import NotificationBell from '../components/NotificationBell';
 import { useTranslation } from '../context/LanguageContext';
+import Footer from '../components/Footer';
 
 const links = [
   { to: '/traveler', labelKey: 'dashboard', end: true },
@@ -76,6 +77,8 @@ export default function TravelerLayout() {
       <main className="flex-1 p-6 md:p-8 max-w-6xl mx-auto w-full">
         <Outlet />
       </main>
+      
+      <Footer />
     </div>
   );
 }

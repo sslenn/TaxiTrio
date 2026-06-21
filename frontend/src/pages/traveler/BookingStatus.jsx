@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { getBookingById } from '../../service/bookingService';
 import { submitReview } from '../../service/reviewService';
+import { verifyStripePayment } from '../../service/paymentService';
 import PageHeader from '../../components/PageHeader';
 import GoldButton from '../../components/GoldButton';
 import StatusBadge from '../../components/StatusBadge';
@@ -10,16 +11,30 @@ import DashboardCard from '../../components/DashboardCard';
 export default function BookingStatus() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [booking, setBooking] = useState(null);
   const [review, setReview] = useState({ rating: 5, comment: '' });
   const [reviewed, setReviewed] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => { 
-    getBookingById(id)
-      .then((r) => setBooking(r.data.data))
-      .catch(() => navigate('/traveler/bookings')); 
-  }, [id, navigate]);
+    const verifyAndLoad = async () => {
+      try {
+        const stripeStatus = searchParams.get('stripe');
+        if (stripeStatus === 'success') {
+          // Clear query parameters to prevent re-triggering verification on reload
+          setSearchParams({});
+          await verifyStripePayment(id);
+        }
+        const res = await getBookingById(id);
+        setBooking(res.data.data);
+      } catch (err) {
+        console.error('Failed to verify stripe or load booking:', err);
+        navigate('/traveler/bookings');
+      }
+    };
+    verifyAndLoad();
+  }, [id, navigate, searchParams, setSearchParams]);
 
   const handleReview = async (e) => {
     e.preventDefault();

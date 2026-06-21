@@ -109,7 +109,28 @@ export default function ReviewCustomRequests() {
                     <div className="text-xs text-neutral-400 mt-2 bg-emerald-950/10 p-3 rounded-xl border border-emerald-900/30 leading-relaxed">
                       <span className="font-bold text-emerald-400 block mb-1">✓ Traveler Confirmed Details:</span>
                       <p className="mb-0.5"><span className="text-neutral-500">Pickup Date/Time:</span> {r.travel_date} {r.travel_time && `at ${r.travel_time}`}</p>
-                      {r.telegram_contact && <p className="mb-0.5"><span className="text-neutral-500">Telegram Username:</span> {r.telegram_contact}</p>}
+                      {r.telegram_contact && (
+                        <p className="mb-0.5">
+                          <span className="text-neutral-500">Telegram Username:</span>{' '}
+                          {(() => {
+                            const clean = r.telegram_contact.trim();
+                            const username = clean.startsWith('@') ? clean.substring(1) : clean;
+                            const isValid = /^[a-zA-Z0-9_]{5,32}$/.test(username);
+                            return isValid ? (
+                              <a 
+                                href={`https://t.me/${username}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-gold hover:underline font-medium"
+                              >
+                                {r.telegram_contact}
+                              </a>
+                            ) : (
+                              r.telegram_contact
+                            );
+                          })()}
+                        </p>
+                      )}
                       {r.traveler_response && <p><span className="text-neutral-500">Confirmation Notes:</span> {r.traveler_response}</p>}
                     </div>
                   )}

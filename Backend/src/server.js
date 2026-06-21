@@ -20,15 +20,29 @@ const customTripRoutes  = require('./routes/customTrip_routes');
 const reviewRoutes      = require('./routes/review_routes');
 const notificationRoutes = require('./routes/notification_routes');
 const reportRoutes      = require('./routes/report_routes');
-const telegramRoutes    = require('./routes/telegram_routes');
 
 const app = express();
 
 app.use(cors());
-app.use(morgan('dev'));
-app.use(express.json());
-app.use(cookieParser());
+app.use(morgan('dev'));   // log HTTP requests to console
+app.use(express.json());   // parse JSON request bodies
+app.use(cookieParser()); // parse cookies for refresh token handling
 app.use('/uploads', express.static(path.join(__dirname, '..', process.env.UPLOAD_DIR || 'uploads')));
+
+// 1. CSRF Token Generation endpoint (exempt from CSRF checks)
+app.get('/api/csrf-token', (req, res) => {
+  const { generateToken } = require('./middlewares/csrf_middleware');
+  res.json({ csrfToken: generateToken(req, res) });
+});
+
+// 2. Global CSRF Protection Middleware (with webhook bypass)
+const { doubleCsrfProtection } = require('./middlewares/csrf_middleware');
+app.use((req, res, next) => {
+  if (req.path === '/api/payments/webhook' || ['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+    return next();
+  }
+  doubleCsrfProtection(req, res, next);
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api', userRoutes);
@@ -42,9 +56,11 @@ app.use('/api', customTripRoutes);
 app.use('/api', reviewRoutes);
 app.use('/api', notificationRoutes);
 app.use('/api', reportRoutes);
-app.use('/api/telegram', telegramRoutes);
 
 app.use(errorMiddleware); // centralized error handling
+
+
+
 
 const PORT = process.env.PORT || 5000;
 
@@ -52,14 +68,8 @@ const PORT = process.env.PORT || 5000;
 sequelize.authenticate()
   .then(() => {
     console.log('Database connected.');
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, async () => {
       console.log(`TaxiTrio API running on port ${PORT}`);
-      try {
-        const { initializeTelegramWebhook } = require('./utils/telegram');
-        initializeTelegramWebhook();
-      } catch (err) {
-        console.error('Failed to initialize Telegram webhook:', err.message);
-      }
     });
   })
   .catch((err) => {

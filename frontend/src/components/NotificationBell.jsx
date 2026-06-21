@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { getNotifications, markRead } from '../service/notificationService';
 
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const navigate = useNavigate();
 
   const load = async () => {
     try {
@@ -36,15 +38,61 @@ export default function NotificationBell() {
     } catch {}
   };
 
+  const handleMarkAllRead = async () => {
+    try {
+      const unreadNotis = notifications.filter(n => !n.is_read);
+      // Sequentially mark each read in backend
+      for (const n of unreadNotis) {
+        await markRead(n.id);
+      }
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    } catch (err) {
+      console.error("Failed to mark all notifications read:", err);
+    }
+  };
+
+  const handleNotificationClick = async (n) => {
+    // 1. Mark as read
+    if (!n.is_read) {
+      await handleMarkRead(n.id);
+    }
+    
+    // 2. Close dropdown modal
+    setOpen(false);
+
+    // 3. Determine navigation route
+    const currentPath = window.location.pathname;
+    const message = n.message || '';
+    const title = n.title || '';
+    const match = message.match(/#(\d+)/);
+    const bookingId = match ? match[1] : '';
+
+    if (currentPath.startsWith('/admin')) {
+      if (title.toLowerCase().includes('payment') || title.toLowerCase().includes('paid') || message.toLowerCase().includes('payment')) {
+        navigate('/admin/payments');
+      } else {
+        navigate('/admin/bookings');
+      }
+    } else if (currentPath.startsWith('/driver')) {
+      navigate('/driver/bookings');
+    } else if (currentPath.startsWith('/traveler')) {
+      if (bookingId) {
+        navigate(`/traveler/bookings/${bookingId}`);
+      } else {
+        navigate('/traveler/bookings');
+      }
+    }
+  };
+
   return (
-    <div className="relative" ref={ref}>
-      <button onClick={() => setOpen(!open)} className="relative p-1">
+    <div className="relative font-sans" ref={ref}>
+      <button onClick={() => setOpen(!open)} className="relative p-1 flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-muted hover:text-white transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
             d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
         </svg>
         {unread > 0 && (
-          <span className="absolute -top-1 -right-1 bg-gold text-black text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-gold text-black text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
@@ -64,9 +112,12 @@ export default function NotificationBell() {
               <div className="flex items-center gap-2">
                 <span className="font-bold text-base text-white">Notifications</span>
                 {unread > 0 && (
-                  <span className="bg-gold/10 text-gold text-xs font-semibold px-2 py-0.5 rounded-full border border-gold/20">
-                    {unread} unread
-                  </span>
+                  <button 
+                    onClick={handleMarkAllRead}
+                    className="text-[10px] text-gold hover:text-gold/80 hover:underline uppercase tracking-wider font-bold ml-2 transition"
+                  >
+                    Mark all read
+                  </button>
                 )}
               </div>
               <button 
@@ -92,9 +143,7 @@ export default function NotificationBell() {
                 notifications.map((n) => (
                   <div
                     key={n.id}
-                    onClick={() => {
-                      if (!n.is_read) handleMarkRead(n.id);
-                    }}
+                    onClick={() => handleNotificationClick(n)}
                     className={`px-5 py-4 cursor-pointer hover:bg-neutral-900/40 transition-colors flex flex-col gap-1 ${!n.is_read ? 'bg-gold/5' : ''}`}
                   >
                     <div className="flex justify-between items-start gap-2">

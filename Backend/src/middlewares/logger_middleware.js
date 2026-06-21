@@ -1,3 +1,5 @@
+// how long it takes to process each request and log it to the console
+
 const logger = (req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {

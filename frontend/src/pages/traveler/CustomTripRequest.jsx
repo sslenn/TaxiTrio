@@ -48,9 +48,19 @@ export default function CustomTripRequest() {
             Our concierge desk will review your bespoke itinerary and reply with pricing options and driver assignments.
           </p>
         </div>
-        <GoldButton onClick={() => navigate('/traveler')} className="w-full">
-          Back to Dashboard
-        </GoldButton>
+        <div className="flex flex-col gap-3 w-full">
+          <a 
+            href="https://t.me/taxitrio_support" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="w-full text-center px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 bg-[#D4AF37] hover:bg-[#BFA76A] text-black border border-transparent shadow-lg shadow-gold/10 flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            💬 Chat with Support
+          </a>
+          <GoldButton onClick={() => navigate('/traveler')} className="w-full" variant="outline">
+            Back to Dashboard
+          </GoldButton>
+        </div>
       </div>
     </div>
   );

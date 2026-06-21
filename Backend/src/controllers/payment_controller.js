@@ -52,4 +52,22 @@ const simulateKHQR = async (req, res, next) => {
   catch (e) { next(e); }
 };
 
-module.exports = { create, getAll, verify, reject, getCheckout, simulateKHQR };
+const getStatus = async (req, res, next) => {
+  try {
+    res.json(successResponse('Payment status fetched', await paymentService.getStatus(req.user.id, req.params.bookingId)));
+  } catch (e) { next(e); }
+};
+
+const createStripeSession = async (req, res, next) => {
+  try {
+    res.json(successResponse('Stripe session created', await paymentService.createStripeSession(req.user.id, req.params.bookingId)));
+  } catch (e) { next(e); }
+};
+
+const verifyStripePayment = async (req, res, next) => {
+  try {
+    res.json(successResponse('Stripe payment verified', await paymentService.verifyStripePayment(req.user.id, req.params.bookingId)));
+  } catch (e) { next(e); }
+};
+
+module.exports = { create, getAll, verify, reject, getCheckout, simulateKHQR, getStatus, createStripeSession, verifyStripePayment };

@@ -14,6 +14,7 @@ export default function BookingHistory() {
   const [customRequests, setCustomRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [confirmFormState, setConfirmFormState] = useState({});
+  const [editingCustom, setEditingCustom] = useState({});
 
   const load = () => {
     setLoading(true);
@@ -89,7 +90,7 @@ export default function BookingHistory() {
       return;
     }
     try {
-      await confirmCustomRequest(id, {
+      const res = await confirmCustomRequest(id, {
         telegram_contact: fState.telegram,
         traveler_response: fState.notes,
         origin: fState.origin,
@@ -97,8 +98,16 @@ export default function BookingHistory() {
         travel_date: fState.travel_date,
         travel_time: fState.travel_time
       });
-      alert('Your details and contact have been confirmed and sent to the admin.');
-      load();
+      
+      const sessionUrl = res.data?.data?.sessionUrl;
+      if (sessionUrl) {
+        alert('Details saved! Redirecting to Stripe checkout to complete payment...');
+        window.location.href = sessionUrl;
+      } else {
+        alert('Details saved successfully!');
+        setEditingCustom((prev) => ({ ...prev, [id]: false }));
+        load();
+      }
     } catch (err) {
       alert(err.response?.data?.message || 'Confirmation failed');
     }
@@ -256,16 +265,24 @@ export default function BookingHistory() {
                   )}
 
                   {/* Confirmed traveler details display */}
-                  {(r.telegram_contact || r.traveler_response) && (
-                    <div className="text-xs text-neutral-400 mt-2 bg-emerald-950/10 p-3 rounded-xl border border-emerald-900/30 leading-relaxed max-w-lg">
+                  {r.status === 'approved' && r.traveler_response && !editingCustom[r.id] && (
+                    <div className="text-xs text-neutral-400 mt-2 bg-emerald-950/10 p-3 rounded-xl border border-emerald-900/30 leading-relaxed max-w-lg relative z-10">
                       <span className="font-bold text-emerald-400 block mb-1">✓ Confirmed Details:</span>
+                      <p className="mb-0.5"><span className="text-neutral-500">Pickup Address:</span> {r.origin}</p>
+                      <p className="mb-0.5"><span className="text-neutral-500">Dropoff Address:</span> {r.destination}</p>
                       <p className="mb-0.5"><span className="text-neutral-500">Pickup Date/Time:</span> {r.travel_date} {r.travel_time && `at ${r.travel_time}`}</p>
                       {r.telegram_contact && <p className="mb-0.5"><span className="text-neutral-500">Telegram Username:</span> {r.telegram_contact}</p>}
-                      {r.traveler_response && <p><span className="text-neutral-500">Confirmation Notes:</span> {r.traveler_response}</p>}
+                      {r.traveler_response && <p className="mb-2"><span className="text-neutral-500">Confirmation Notes:</span> {r.traveler_response}</p>}
+                      <button 
+                        onClick={() => setEditingCustom((prev) => ({ ...prev, [r.id]: true }))}
+                        className="text-[10px] text-gold hover:underline font-bold uppercase tracking-wider transition-colors"
+                      >
+                        ✏️ Modify Details / Pickup Address
+                      </button>
                     </div>
                   )}
-                  {/* Confirmation form for approved requests (only show if not already confirmed) */}
-                  {r.status === 'approved' && !r.telegram_contact && !r.traveler_response && (() => {
+                  {/* Confirmation form for approved requests */}
+                  {r.status === 'approved' && (!r.traveler_response || editingCustom[r.id]) && (() => {
                     const fState = getFormState(r.id, r);
                     return (
                       <div className="mt-4 border-t border-neutral-900/60 pt-4 flex flex-col gap-4 max-w-2xl z-10 w-full">
@@ -282,10 +299,10 @@ export default function BookingHistory() {
                             </div>
                             <label className="text-[9px] uppercase font-bold text-[#BFA76A] tracking-wider block">Pickup Address</label>
                             <input 
-                              className="bg-[#121212] border border-gold/10 text-white rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-gold/60 w-full"
-                              placeholder="Type manually or select via map below"
+                              className="bg-[#0B0B0B]/80 border border-gold/5 text-neutral-400 rounded-lg px-3 py-2 text-xs focus:outline-none cursor-not-allowed w-full font-light"
+                              placeholder="🔒 Select on the map below"
                               value={fState.origin}
-                              onChange={(e) => updateFormState(r.id, 'origin', e.target.value)}
+                              readOnly
                               required
                             />
                           </div>
@@ -313,7 +330,7 @@ export default function BookingHistory() {
                           <p className="text-[9px] uppercase font-bold text-[#BFA76A] tracking-wider block mb-2 px-1">Interactive Map Routing</p>
                           <MapPicker 
                             onSelectPickup={(address) => handleSelectPickup(r.id, address)} 
-                            onSelectDropoff={(address) => handleSelectDropoff(r.id, address)} 
+                            onlyPickup={true}
                           />
                         </div>
 
@@ -366,9 +383,9 @@ export default function BookingHistory() {
 
                         <GoldButton 
                           onClick={() => handleConfirm(r.id)} 
-                          className="px-5 py-2.5 self-start text-xs shadow-md mt-1"
+                          className="px-5 py-2.5 self-start text-xs shadow-md mt-1 flex items-center gap-1.5"
                         >
-                          Save & Confirm details
+                          💳 Pay & Confirm with Card
                         </GoldButton>
                       </div>
                     );

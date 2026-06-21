@@ -10,7 +10,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-export default function MapPicker({ onSelectPickup, onSelectDropoff }) {
+export default function MapPicker({ onSelectPickup, onSelectDropoff, onlyPickup = false }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const pickupMarker = useRef(null);
@@ -130,7 +130,7 @@ export default function MapPicker({ onSelectPickup, onSelectDropoff }) {
   const handleMapClick = async (lat, lng) => {
     const address = await reverseGeocode(lat, lng);
 
-    if (activePin === 'pickup') {
+    if (activePin === 'pickup' || onlyPickup) {
       setPickupAddr(address);
       onSelectPickup(address, { lat, lng });
 
@@ -152,11 +152,13 @@ export default function MapPicker({ onSelectPickup, onSelectDropoff }) {
           .openPopup();
       }
 
-      if (dropoffMarker.current) {
-        const dropoffLatLng = dropoffMarker.current.getLatLng();
-        drawRoute({ lat, lng }, dropoffLatLng);
-      } else {
-        setActivePin('dropoff');
+      if (!onlyPickup) {
+        if (dropoffMarker.current) {
+          const dropoffLatLng = dropoffMarker.current.getLatLng();
+          drawRoute({ lat, lng }, dropoffLatLng);
+        } else {
+          setActivePin('dropoff');
+        }
       }
     } else {
       setDropoffAddr(address);
@@ -238,7 +240,7 @@ export default function MapPicker({ onSelectPickup, onSelectDropoff }) {
     setPickupAddr('');
     setDropoffAddr('');
     onSelectPickup('');
-    onSelectDropoff('');
+    if (onSelectDropoff) onSelectDropoff('');
     setActivePin('pickup');
     setSearchQuery('');
     setSearchResults([]);
@@ -318,32 +320,34 @@ export default function MapPicker({ onSelectPickup, onSelectDropoff }) {
       </div>
 
       {/* Segmented Mode Selector Control */}
-      <div className="flex p-1 rounded-xl bg-neutral-950/80 border border-neutral-800/60 mt-1">
-        <button
-          type="button"
-          onClick={() => setActivePin('pickup')}
-          className={`flex-1 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-250 flex items-center justify-center gap-1.5 ${
-            activePin === 'pickup'
-              ? 'bg-green-600/20 border border-green-500/30 text-green-400 shadow-sm'
-              : 'text-neutral-500 hover:text-neutral-300'
-          }`}
-        >
-          <span className={`w-2 h-2 rounded-full ${activePin === 'pickup' ? 'bg-green-400 animate-pulse' : 'bg-neutral-600'}`} />
-          1. Pickup {pickupAddr ? '✓' : ''}
-        </button>
-        <button
-          type="button"
-          onClick={() => setActivePin('dropoff')}
-          className={`flex-1 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-250 flex items-center justify-center gap-1.5 ${
-            activePin === 'dropoff'
-              ? 'bg-red-600/20 border border-red-500/30 text-red-400 shadow-sm'
-              : 'text-neutral-500 hover:text-neutral-300'
-          }`}
-        >
-          <span className={`w-2 h-2 rounded-full ${activePin === 'dropoff' ? 'bg-red-400 animate-pulse' : 'bg-neutral-600'}`} />
-          2. Dropoff {dropoffAddr ? '✓' : ''}
-        </button>
-      </div>
+      {!onlyPickup && (
+        <div className="flex p-1 rounded-xl bg-neutral-950/80 border border-neutral-800/60 mt-1">
+          <button
+            type="button"
+            onClick={() => setActivePin('pickup')}
+            className={`flex-1 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-250 flex items-center justify-center gap-1.5 ${
+              activePin === 'pickup'
+                ? 'bg-green-600/20 border border-green-500/30 text-green-400 shadow-sm'
+                : 'text-neutral-500 hover:text-neutral-300'
+            }`}
+          >
+            <span className={`w-2 h-2 rounded-full ${activePin === 'pickup' ? 'bg-green-400 animate-pulse' : 'bg-neutral-600'}`} />
+            1. Pickup {pickupAddr ? '✓' : ''}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActivePin('dropoff')}
+            className={`flex-1 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-250 flex items-center justify-center gap-1.5 ${
+              activePin === 'dropoff'
+                ? 'bg-red-600/20 border border-red-500/30 text-red-400 shadow-sm'
+                : 'text-neutral-500 hover:text-neutral-300'
+            }`}
+          >
+            <span className={`w-2 h-2 rounded-full ${activePin === 'dropoff' ? 'bg-red-400 animate-pulse' : 'bg-neutral-600'}`} />
+            2. Dropoff {dropoffAddr ? '✓' : ''}
+          </button>
+        </div>
+      )}
 
     </div>
   );
