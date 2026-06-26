@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../lib/axios';
 import PageHeader from '../../components/PageHeader';
 import GoldButton from '../../components/GoldButton';
+import { MapPin, Flag } from 'lucide-react';
 
 export default function CustomTripRequest() {
   const navigate = useNavigate();
@@ -96,7 +97,7 @@ export default function CustomTripRequest() {
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] uppercase font-bold text-[#BFA76A] tracking-wider block">Origin Location</label>
                 <div className="relative">
-                  <span className="absolute left-4 top-3.5 text-gold text-xs">📍</span>
+                  <MapPin className="absolute left-4 top-[14px] text-gold w-4 h-4" />
                   <input 
                     className="w-full bg-[#0B0B0B] border border-gold/15 text-white rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:border-gold/60 transition duration-300" 
                     placeholder="E.g., BKK1, Phnom Penh" 
@@ -113,7 +114,7 @@ export default function CustomTripRequest() {
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] uppercase font-bold text-[#BFA76A] tracking-wider block">Destination Location</label>
                 <div className="relative">
-                  <span className="absolute left-4 top-3.5 text-gold text-xs">🏁</span>
+                  <Flag className="absolute left-4 top-[14px] text-gold w-4 h-4" />
                   <input 
                     className="w-full bg-[#0B0B0B] border border-gold/15 text-white rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:border-gold/60 transition duration-300" 
                     placeholder="E.g., Pub Street, Siem Reap" 

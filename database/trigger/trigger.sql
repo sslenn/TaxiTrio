@@ -1,7 +1,7 @@
 -- TaxiTrio Triggers
 
 -- ─── 1. Auto-update updated_at on all tables ───────────────────────────────
-
+-- this function aims to automatically update the updated_at column whenever a row is updated in any of the specified tables. This ensures that the timestamp reflects the last modification time for each record.
 CREATE OR REPLACE FUNCTION fn_set_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN
@@ -15,7 +15,7 @@ DECLARE tbl TEXT;
 BEGIN
   FOREACH tbl IN ARRAY ARRAY[
     'users','vehicles','routes','transportation_packages',
-    'bookings','payment_records','custom_trip_requests','reviews','notifications'
+    'bookings','payment_records','custom_trip_requests','reviews','notifications','pricing_rules'
   ] LOOP
     EXECUTE format(
       'CREATE TRIGGER trg_%I_updated_at
@@ -33,8 +33,8 @@ CREATE OR REPLACE FUNCTION fn_log_booking_status()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN
   IF NEW.status IS DISTINCT FROM OLD.status THEN
-    INSERT INTO booking_status_history (booking_id, status, changed_by)
-    VALUES (NEW.id, NEW.status, NULL);
+    INSERT INTO booking_status_history (booking_id, status, changed_by, created_at)
+    VALUES (NEW.id, NEW.status, NULL, NOW());
   END IF;
   RETURN NEW;
 END;
@@ -51,13 +51,13 @@ RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN
   IF NEW.status IS DISTINCT FROM OLD.status THEN
     IF NEW.status = 'verified' THEN
-      INSERT INTO notifications (user_id, title, message)
+      INSERT INTO notifications (user_id, title, message, created_at, updated_at)
       VALUES (NEW.traveler_id, 'Payment Verified',
-              'Your payment has been verified. Your booking is now being processed.');
+              'Your payment has been verified. Your booking is now being processed.', NOW(), NOW());
     ELSIF NEW.status = 'rejected' THEN
-      INSERT INTO notifications (user_id, title, message)
+      INSERT INTO notifications (user_id, title, message, created_at, updated_at)
       VALUES (NEW.traveler_id, 'Payment Rejected',
-              'Your payment was rejected. Please re-upload your proof of payment.');
+              'Your payment was rejected. Please re-upload your proof of payment.', NOW(), NOW());
     END IF;
   END IF;
   RETURN NEW;
@@ -75,17 +75,17 @@ RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN
   IF NEW.status IS DISTINCT FROM OLD.status THEN
     IF NEW.status = 'accepted' THEN
-      INSERT INTO notifications (user_id, title, message)
+      INSERT INTO notifications (user_id, title, message, created_at, updated_at)
       VALUES (NEW.traveler_id, 'Driver Accepted',
-              'Your driver has accepted the booking. Get ready!');
+              'Your driver has accepted the booking. Get ready!', NOW(), NOW());
     ELSIF NEW.status = 'rejected' THEN
-      INSERT INTO notifications (user_id, title, message)
+      INSERT INTO notifications (user_id, title, message, created_at, updated_at)
       VALUES (NEW.traveler_id, 'Driver Rejected',
-              'Your assigned driver has rejected the booking. We will reassign shortly.');
+              'Your assigned driver has rejected the booking. We will reassign shortly.', NOW(), NOW());
     ELSIF NEW.status = 'completed' THEN
-      INSERT INTO notifications (user_id, title, message)
+      INSERT INTO notifications (user_id, title, message, created_at, updated_at)
       VALUES (NEW.traveler_id, 'Trip Completed',
-              'Your trip has been completed. Thank you for choosing TaxiTrio!');
+              'Your trip has been completed. Thank you for choosing TaxiTrio!', NOW(), NOW());
     END IF;
   END IF;
   RETURN NEW;

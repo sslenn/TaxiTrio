@@ -4,6 +4,7 @@ import { getUser } from '../../utils/auth';
 import { getPackages } from '../../service/packageService';
 import { getMyBookings } from '../../service/bookingService';
 import PageHeader from '../../components/PageHeader';
+import { Clock, Users } from 'lucide-react';
 import StatCard from '../../components/StatCard';
 import GoldButton from '../../components/GoldButton';
 
@@ -140,8 +141,8 @@ export default function TravelerDashboard() {
                 </div>
                 
                 <div className="border-t border-neutral-900 pt-3 flex items-center justify-between text-[11px] text-neutral-400">
-                  <span>⏱ {p.duration_days} Day(s)</span>
-                  <span>👥 Max {p.max_persons} Persons</span>
+                  <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-gold" /> {p.duration_days} Day(s)</span>
+                  <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-gold" /> Max {p.max_persons} Persons</span>
                 </div>
 
                 <GoldButton

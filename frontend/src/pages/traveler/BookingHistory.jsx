@@ -176,7 +176,11 @@ export default function BookingHistory() {
               >
                 <div className="flex flex-col gap-2 relative z-10">
                   <div className="flex items-center gap-3">
-                    <span className="font-bold text-gold text-lg font-serif capitalize">{b.booking_type.replace('_', ' ')}</span>
+                    <span className="font-bold text-gold text-lg font-serif capitalize">
+                      {b.notes?.startsWith('[Custom Trip]') || b.notes?.includes('Custom Trip Request') || b.notes?.includes('Bespoke Custom')
+                        ? 'custom trip'
+                        : b.booking_type.replace('_', ' ')}
+                    </span>
                     <StatusBadge status={b.status === 'rejected' ? 'reassigning' : b.status} />
                   </div>
                   <p className="text-[#A3A3A3] text-sm font-light mt-0.5">

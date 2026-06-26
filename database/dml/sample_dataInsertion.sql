@@ -3,15 +3,15 @@
 
 INSERT INTO users (id, full_name, email, phone, password, role) VALUES
   ('a1000000-0000-0000-0000-000000000001', 'Admin TaxiTrio', 'admin@taxitrio.com', '+85512000001',
-   '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LPVImR8.O96', 'admin'),
+   '$2b$10$SycM8Kwblwfk1fmQMoU.He1yVrdAy3JpddUM86VVnibc3iOkvxR6q', 'admin'),
   ('a1000000-0000-0000-0000-000000000002', 'Dara Chan', 'dara@driver.com', '+85512000002',
-   '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LPVImR8.O96', 'driver'),
+   '$2b$10$SycM8Kwblwfk1fmQMoU.He1yVrdAy3JpddUM86VVnibc3iOkvxR6q', 'driver'),
   ('a1000000-0000-0000-0000-000000000003', 'Sophea Lim', 'sophea@driver.com', '+85512000003',
-   '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LPVImR8.O96', 'driver'),
+   '$2b$10$SycM8Kwblwfk1fmQMoU.He1yVrdAy3JpddUM86VVnibc3iOkvxR6q', 'driver'),
   ('a1000000-0000-0000-0000-000000000004', 'Maly Ros', 'maly@traveler.com', '+85512000004',
-   '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LPVImR8.O96', 'traveler'),
+   '$2b$10$SycM8Kwblwfk1fmQMoU.He1yVrdAy3JpddUM86VVnibc3iOkvxR6q', 'traveler'),
   ('a1000000-0000-0000-0000-000000000005', 'James Carter', 'james@traveler.com', '+85512000005',
-   '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LPVImR8.O96', 'traveler');
+   '$2b$10$SycM8Kwblwfk1fmQMoU.He1yVrdAy3JpddUM86VVnibc3iOkvxR6q', 'traveler');
 
 INSERT INTO vehicles (id, driver_id, plate_number, type, brand, model, capacity) VALUES
   ('b1000000-0000-0000-0000-000000000001', 'a1000000-0000-0000-0000-000000000002',

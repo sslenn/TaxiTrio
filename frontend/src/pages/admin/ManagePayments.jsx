@@ -163,7 +163,9 @@ export default function ManagePayments() {
                     {p.payment_method} · <span className="text-gold font-bold">${p.amount}</span>
                   </p>
                   <p className="text-[#555] text-xs font-medium capitalize mt-1">
-                    Service: {p.booking?.booking_type?.replace('_', ' ')}
+                    Service: {p.booking?.notes?.startsWith('[Custom Trip]') || p.booking?.notes?.includes('Custom Trip Request') || p.booking?.notes?.includes('Bespoke Custom')
+                      ? 'custom trip'
+                      : p.booking?.booking_type?.replace('_', ' ')}
                   </p>
                   <p className="text-[#555] text-[10px] font-medium mt-1">
                     Logged: {new Date(p.created_at || p.createdAt || Date.now()).toLocaleString()}

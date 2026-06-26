@@ -4,10 +4,7 @@ const sequelize = require('../db/config/db_config');
 const BookingStatusHistory = sequelize.define('BookingStatusHistory', {
   id:     { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
   status: {
-    type: DataTypes.ENUM(
-      'pending_payment','payment_verified','driver_assigned',
-      'accepted','rejected','en_route','arrived','in_progress','completed','cancelled'
-    ),
+    type: 'booking_status',
     allowNull: false,
   },
   note: { type: DataTypes.TEXT },

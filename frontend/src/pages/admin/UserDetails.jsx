@@ -243,7 +243,9 @@ export default function UserDetails() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[10px] font-bold text-white uppercase tracking-wider">
-                        {b.booking_type.replace('_', ' ')}
+                        {b.notes?.startsWith('[Custom Trip]') || b.notes?.includes('Custom Trip Request') || b.notes?.includes('Bespoke Custom')
+                          ? 'custom trip'
+                          : b.booking_type.replace('_', ' ')}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-[#A3A3A3] text-xs max-w-xs truncate">

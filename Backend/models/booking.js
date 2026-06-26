@@ -3,16 +3,16 @@ const sequelize = require('../db/config/db_config');
 
 const Booking = sequelize.define('Booking', {
   id:               { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  booking_type:     { type: DataTypes.ENUM('city_ride','intercity','package'), allowNull: false },
+  booking_type:     { 
+    type: 'booking_type', 
+    allowNull: false 
+  },
   status:           {
-    type: DataTypes.ENUM(
-      'pending_payment','payment_verified','driver_assigned',
-      'accepted','rejected','en_route','arrived','in_progress','completed','cancelled'
-    ),
+    type: 'booking_status',
     defaultValue: 'pending_payment',
   },
-  pickup_location:  { type: DataTypes.STRING(255) },
-  dropoff_location: { type: DataTypes.STRING(255) },
+  pickup_location:  { type: DataTypes.TEXT },
+  dropoff_location: { type: DataTypes.TEXT },
   pickup_lat:       { type: DataTypes.DECIMAL(10, 8) },
   pickup_lng:       { type: DataTypes.DECIMAL(11, 8) },
   dropoff_lat:      { type: DataTypes.DECIMAL(10, 8) },

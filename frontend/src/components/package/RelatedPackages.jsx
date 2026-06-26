@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Clock, Users } from 'lucide-react';
 
 export default function RelatedPackages({ currentId, allPackages }) {
   const navigate = useNavigate();
@@ -39,8 +40,8 @@ export default function RelatedPackages({ currentId, allPackages }) {
             </div>
             
             <div className="border-t border-neutral-900 pt-3 flex items-center justify-between text-[10px] text-neutral-400">
-              <span>⏱ {p.duration_days} Day(s)</span>
-              <span>👥 Max {p.max_persons} Persons</span>
+              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-gold" /> {p.duration_days} Day(s)</span>
+              <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5 text-gold" /> Max {p.max_persons} Persons</span>
             </div>
           </div>
         ))}

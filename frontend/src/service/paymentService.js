@@ -12,3 +12,4 @@ export const getPaymentStatus = (bookingId) => api.get(`/payments/checkout/${boo
 export const simulateKHQRPayment = (bookingId) => api.post(`/payments/${bookingId}/simulate-khqr-pay`);
 export const createStripeSession = (bookingId) => api.post(`/payments/checkout/${bookingId}/stripe`);
 export const verifyStripePayment = (bookingId) => api.post(`/payments/checkout/${bookingId}/stripe-verify`);
+export const initiateUnifiedPayment = (data) => api.post('/payments/create-payment', data);

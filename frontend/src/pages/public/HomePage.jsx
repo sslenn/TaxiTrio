@@ -5,6 +5,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import ServiceCard from '../../components/ServiceCard';
 import { useTranslation } from '../../context/LanguageContext';
+import { Sparkles } from 'lucide-react';
 
 const pageTranslations = {
   en: {
@@ -302,7 +303,7 @@ export default function HomePage() {
           {/* Hero Left Content */}
           <div className="lg:col-span-7 flex flex-col items-start gap-6 text-left">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gold/5 border border-gold/15 text-[10px] uppercase font-bold tracking-widest text-[#D4AF37]">
-              ✨ Premium Travel Platform Cambodia
+              <Sparkles className="w-3 h-3 text-[#D4AF37] animate-pulse" /> Premium Travel Platform Cambodia
             </div>
             
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-normal leading-tight font-serif text-white tracking-wide">

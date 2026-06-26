@@ -1,7 +1,7 @@
 export default function ServiceCard({ title, description, buttonText, icon, onClick, img }) {
   return (
     <div 
-      className="group relative bg-[#121212] border border-gold/20 rounded-3xl flex flex-col justify-between overflow-hidden transition-all duration-500 hover:border-gold/50 hover:shadow-[0_0_40px_rgba(212,175,55,0.06)] hover:-translate-y-1 cursor-pointer"
+      className="group relative bg-[#111111] border border-gold/15 rounded-3xl flex flex-col justify-between overflow-hidden transition-all duration-350 hover:border-gold/45 hover:shadow-[0_12px_40px_rgba(212,175,55,0.07)] hover:-translate-y-2 cursor-pointer"
       onClick={onClick}
     >
       {/* Header image if supplied */}
@@ -10,10 +10,10 @@ export default function ServiceCard({ title, description, buttonText, icon, onCl
           <img 
             src={img} 
             alt={title} 
-            className="w-full h-full object-cover brightness-[0.75] contrast-[1.05] group-hover:brightness-[0.9] group-hover:scale-105 transition-all duration-700 ease-out"
+            className="w-full h-full object-cover brightness-[0.7] contrast-[1.05] group-hover:brightness-[0.85] group-hover:scale-105 transition-all duration-700 ease-out"
           />
           {/* Premium multi-layered gradients for seamless background blending */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-[#111111]/40 to-transparent"></div>
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent"></div>
           {/* Subtle gold highlight line under the image */}
           <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-gold/25 to-transparent"></div>
@@ -29,7 +29,7 @@ export default function ServiceCard({ title, description, buttonText, icon, onCl
         {/* Floating Icon in gold that sits on the image edge */}
         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-gold shadow-lg transition-all duration-500 ${
           img 
-            ? 'bg-[#121212] border border-gold/25 -mt-16 mb-2 shadow-black/40 group-hover:scale-110 group-hover:border-gold group-hover:shadow-[0_0_15px_rgba(212,175,55,0.2)]' 
+            ? 'bg-[#111111] border border-gold/25 -mt-16 mb-2 shadow-black/40 group-hover:scale-110 group-hover:border-gold group-hover:shadow-[0_0_15px_rgba(212,175,55,0.2)]' 
             : 'bg-gold/5 border border-gold/15 group-hover:scale-110 group-hover:bg-gold/10 group-hover:border-gold/35'
         }`}>
           {icon}

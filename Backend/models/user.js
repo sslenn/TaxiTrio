@@ -26,7 +26,10 @@ const User = sequelize.define('User', {
   email:      { type: DataTypes.STRING(150), allowNull: false, unique: true },
   phone:      { type: DataTypes.STRING(100) }, // Increased length to hold iv:tag:encrypted string
   password:   { type: DataTypes.STRING(255), allowNull: true },
-  role:       { type: DataTypes.ENUM('traveler', 'driver', 'admin'), defaultValue: 'traveler' },
+  role:       { 
+    type: 'user_role', 
+    defaultValue: 'traveler' 
+  },
   avatar_url: { type: DataTypes.STRING(500) },
   is_active:  { type: DataTypes.BOOLEAN, defaultValue: true },
   must_change_password: { type: DataTypes.BOOLEAN, defaultValue: false },

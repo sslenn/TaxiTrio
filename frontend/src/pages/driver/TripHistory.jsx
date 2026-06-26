@@ -40,7 +40,9 @@ export default function TripHistory() {
             >
               <div className="flex flex-col gap-2 relative z-10">
                 <span className="font-bold text-gold text-lg font-serif capitalize">
-                  {t.booking_type?.replace('_', ' ')}
+                  {t.notes?.startsWith('[Custom Trip]') || t.notes?.includes('Custom Trip Request') || t.notes?.includes('Bespoke Custom')
+                    ? 'custom trip'
+                    : t.booking_type?.replace('_', ' ')}
                 </span>
                 
                 <p className="text-white font-medium text-sm">

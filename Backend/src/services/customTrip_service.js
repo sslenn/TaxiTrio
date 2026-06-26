@@ -67,7 +67,7 @@ const confirmRequest = async (id, travelerId, { traveler_response, telegram_cont
     dropoff_location: destination,
     pickup_time: pickupTime,
     total_fare: req.quoted_price,
-    notes: traveler_response || `Bespoke Custom Trip Request #${req.id}`
+    notes: `[Custom Trip] ` + (traveler_response || `Bespoke Custom Trip Request #${req.id}`)
   });
 
   await BookingStatusHistory.create({

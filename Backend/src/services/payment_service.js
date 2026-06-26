@@ -44,6 +44,22 @@ const verify = async (id, adminId) => {
     await Booking.update({ status: 'payment_verified' }, { where: { id: payment.booking_id }, transaction: t });
     await t.commit();
 
+    // Dispatch Telegram Notification
+    try {
+      const { sendTelegramAlert } = require('../utils/telegram');
+      const traveler = await User.findByPk(payment.traveler_id);
+      const travelerName = traveler ? traveler.full_name : 'Traveler';
+      sendTelegramAlert(
+        `✅ <b>Payment Manual Approval Success!</b>\n\n` +
+        `<b>Booking ID:</b> #${payment.booking_id}\n` +
+        `<b>Traveler:</b> ${travelerName}\n` +
+        `<b>Amount:</b> $${parseFloat(payment.amount).toFixed(2)}\n` +
+        `<b>Status:</b> verified (Approved by Admin)`
+      );
+    } catch (teleErr) {
+      console.error('Failed to send Telegram alert for admin payment approval:', teleErr);
+    }
+
     // Trigger auto-dispatch asynchronously
     try {
       const bookingService = require('./booking_service');
@@ -85,17 +101,24 @@ const getOrCreateCheckout = async (travelerId, bookingId) => {
   const accountId = process.env.BAKONG_ACCOUNT_ID;
 
   if (accountId) {
-    try {
-      const { BakongKHQR, khqrData, IndividualInfo } = require('bakong-khqr');
+    if (accountId.startsWith('000201')) {
+      const { generateDynamicQR } = require('../utils/qr');
+      qrString = generateDynamicQR(accountId, booking.total_fare, process.env.BAKONG_CURRENCY || 'USD');
+    } else {
+      try {
+        const { BakongKHQR, khqrData, IndividualInfo } = require('bakong-khqr');
       
+      const cleanBillNumber = booking.id.toString().replace(/[^a-zA-Z0-9]/g, '').slice(0, 25);
+      const isRiel = process.env.BAKONG_CURRENCY === 'KHR';
+      const finalAmount = isRiel ? Math.round(parseFloat(booking.total_fare) * 4000) : parseFloat(booking.total_fare);
       const individualInfo = new IndividualInfo(
         accountId,
         process.env.BAKONG_MERCHANT_NAME || 'TaxiTrio',
         'Phnom Penh',
         {
-          currency: process.env.BAKONG_CURRENCY === 'KHR' ? khqrData.currency.khr : khqrData.currency.usd,
-          amount: parseFloat(booking.total_fare),
-          billNumber: `#${booking.id}`,
+          currency: isRiel ? khqrData.currency.khr : khqrData.currency.usd,
+          amount: finalAmount,
+          billNumber: cleanBillNumber,
           expirationTimestamp: Date.now() + (30 * 60 * 1000) // QR code valid for 30 minutes
         }
       );
@@ -111,6 +134,7 @@ const getOrCreateCheckout = async (travelerId, bookingId) => {
     } catch (err) {
       console.error('Error generating KHQR with SDK, falling back to mock:', err);
       qrString = `00020101021238580010A000000765011000000000010212MCKH000188980306Bakong520459995303116540${parseFloat(booking.total_fare).toFixed(2)}5802KH5908TaxiTrio6010Phnom Penh6304ABCD`;
+    }
     }
   } else {
     // Fallback Mock QR code if account is not configured in .env
@@ -154,11 +178,27 @@ const simulateKHQRPay = async (bookingId) => {
     await Booking.update({ status: 'payment_verified' }, { where: { id: bookingId }, transaction: t });
     await t.commit();
 
-    // Create system notification for all Admins
+    // Create system notification for all Admins & send Telegram Alert
     try {
       const { Notification, User } = require('../../models');
       const traveler = await User.findByPk(payment.traveler_id);
       const travelerName = traveler ? traveler.full_name : 'Traveler';
+
+      // Dispatch Telegram Notification
+      try {
+        const { sendTelegramAlert } = require('../utils/telegram');
+        sendTelegramAlert(
+          `✅ <b>Payment Received & Confirmed!</b>\n\n` +
+          `<b>Booking ID:</b> #${bookingId}\n` +
+          `<b>Traveler:</b> ${travelerName}\n` +
+          `<b>Method:</b> KHQR (Simulation)\n` +
+          `<b>Amount:</b> $${parseFloat(payment.amount).toFixed(2)}\n` +
+          `<b>Status:</b> PAID (Auto-Verified)`
+        );
+      } catch (teleErr) {
+        console.error('Failed to send Telegram alert for simulation confirmation:', teleErr);
+      }
+
       const admins = await User.findAll({ where: { role: 'admin' } });
       for (const admin of admins) {
         await Notification.create({
@@ -254,11 +294,27 @@ const verifyStripePayment = async (travelerId, bookingId) => {
     await Booking.update({ status: 'payment_verified' }, { where: { id: bookingId }, transaction: t });
     await t.commit();
 
-    // Create system notification for all Admins
+    // Create system notification for all Admins & send Telegram Alert
     try {
       const { Notification, User } = require('../../models');
       const traveler = await User.findByPk(travelerId);
       const travelerName = traveler ? traveler.full_name : 'Traveler';
+
+      // Dispatch Telegram Notification
+      try {
+        const { sendTelegramAlert } = require('../utils/telegram');
+        sendTelegramAlert(
+          `✅ <b>Payment Received & Confirmed!</b>\n\n` +
+          `<b>Booking ID:</b> #${bookingId}\n` +
+          `<b>Traveler:</b> ${travelerName}\n` +
+          `<b>Method:</b> Stripe Card\n` +
+          `<b>Amount:</b> $${parseFloat(payment.amount).toFixed(2)}\n` +
+          `<b>Status:</b> PAID (Auto-Verified)`
+        );
+      } catch (teleErr) {
+        console.error('Failed to send Telegram alert for Stripe confirmation:', teleErr);
+      }
+
       const admins = await User.findAll({ where: { role: 'admin' } });
       for (const admin of admins) {
         await Notification.create({

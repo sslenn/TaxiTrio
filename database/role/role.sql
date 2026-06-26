@@ -75,5 +75,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE taxitrio_admin, taxitrio_owner IN SCHEMA publi
 
 -- HARDENING DATABASE ACCESS
 REVOKE CREATE ON SCHEMA public FROM PUBLIC; -- Block public schema mutations
-REVOKE ALL ON DATABASE taxitrio FROM PUBLIC;  -- Restrict raw database connections to authenticated roles
-GRANT CONNECT ON DATABASE taxitrio TO taxitrio_owner, taxitrio_admin, taxitrio_app, taxitrio_readonly, taxitrio_backup;
+REVOKE ALL ON DATABASE "Taxitrio" FROM PUBLIC;  -- Restrict raw database connections to authenticated roles
+GRANT CONNECT ON DATABASE "Taxitrio" TO taxitrio_owner, taxitrio_admin, taxitrio_app, taxitrio_readonly, taxitrio_backup;

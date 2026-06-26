@@ -1,4 +1,5 @@
 import React from 'react';
+import { MapPin, Clock, Users, Map } from 'lucide-react';
 
 export default function PackageHero({ name, description, durationDays, maxPersons, province, bannerImage }) {
   return (
@@ -19,8 +20,8 @@ export default function PackageHero({ name, description, durationDays, maxPerson
         <div className="flex flex-col gap-2">
           {/* Destination Badge */}
           {province && (
-            <span className="self-start text-[10px] md:text-xs font-bold uppercase tracking-widest text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/35 px-3.5 py-1.5 rounded-full shadow-[0_0_15px_rgba(212,175,55,0.08)]">
-              📍 {province}
+            <span className="self-start text-[10px] md:text-xs font-bold uppercase tracking-widest text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/35 px-3.5 py-1.5 rounded-full shadow-[0_0_15px_rgba(212,175,55,0.08)] flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-[#D4AF37]" /> {province}
             </span>
           )}
           
@@ -37,7 +38,7 @@ export default function PackageHero({ name, description, durationDays, maxPerson
         <div className="flex flex-wrap gap-4 mt-2">
           {/* Duration Card */}
           <div className="bg-[#151515]/85 backdrop-blur-md border border-gold/15 px-5 py-3 rounded-2xl flex items-center gap-3">
-            <span className="text-xl">⏱</span>
+            <Clock className="w-5 h-5 text-gold shrink-0" />
             <div className="flex flex-col">
               <span className="text-[9px] text-neutral-500 uppercase font-bold tracking-wider">Duration</span>
               <span className="text-xs font-bold text-white mt-0.5">{durationDays} Day(s)</span>
@@ -46,7 +47,7 @@ export default function PackageHero({ name, description, durationDays, maxPerson
 
           {/* Group Size Card */}
           <div className="bg-[#151515]/85 backdrop-blur-md border border-gold/15 px-5 py-3 rounded-2xl flex items-center gap-3">
-            <span className="text-xl">👥</span>
+            <Users className="w-5 h-5 text-gold shrink-0" />
             <div className="flex flex-col">
               <span className="text-[9px] text-neutral-500 uppercase font-bold tracking-wider">Group Size</span>
               <span className="text-xs font-bold text-white mt-0.5">Up to {maxPersons} Pax</span>
@@ -56,7 +57,7 @@ export default function PackageHero({ name, description, durationDays, maxPerson
           {/* Location Card */}
           {province && (
             <div className="bg-[#151515]/85 backdrop-blur-md border border-gold/15 px-5 py-3 rounded-2xl flex items-center gap-3">
-              <span className="text-xl">🗺</span>
+              <Map className="w-5 h-5 text-gold shrink-0" />
               <div className="flex flex-col">
                 <span className="text-[9px] text-neutral-500 uppercase font-bold tracking-wider">Location</span>
                 <span className="text-xs font-bold text-white mt-0.5">{province}, Cambodia</span>

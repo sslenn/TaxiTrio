@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createBooking } from '../../service/bookingService';
 import GoldButton from '../GoldButton';
+import { Clock, Users, Car } from 'lucide-react';
 
 export default function PackageBookingCard({ packageId, price, durationDays, maxPersons, vehicle }) {
   const navigate = useNavigate();
@@ -46,15 +47,21 @@ export default function PackageBookingCard({ packageId, price, durationDays, max
       {/* Package Key Metrics */}
       <div className="flex flex-col gap-3.5 text-xs text-neutral-300 font-light">
         <div className="flex justify-between items-center border-b border-neutral-900/60 pb-2.5">
-          <span className="text-neutral-500 font-bold uppercase tracking-wider text-[9px]">⏱ Duration:</span>
+          <span className="text-neutral-500 font-bold uppercase tracking-wider text-[9px] flex items-center gap-1">
+            <Clock className="w-3 h-3 text-gold" /> Duration:
+          </span>
           <span className="text-white font-medium">{durationDays} Day(s)</span>
         </div>
         <div className="flex justify-between items-center border-b border-neutral-900/60 pb-2.5">
-          <span className="text-neutral-500 font-bold uppercase tracking-wider text-[9px]">👥 Max Group:</span>
+          <span className="text-neutral-500 font-bold uppercase tracking-wider text-[9px] flex items-center gap-1">
+            <Users className="w-3 h-3 text-gold" /> Max Group:
+          </span>
           <span className="text-white font-medium">Up to {maxPersons} Persons</span>
         </div>
         <div className="flex justify-between items-center pb-1">
-          <span className="text-neutral-500 font-bold uppercase tracking-wider text-[9px]">🚗 Vehicle Class:</span>
+          <span className="text-neutral-500 font-bold uppercase tracking-wider text-[9px] flex items-center gap-1">
+            <Car className="w-3 h-3 text-gold" /> Vehicle Class:
+          </span>
           <span className="text-white font-medium capitalize">{vehicle || 'Premium SUV'}</span>
         </div>
       </div>

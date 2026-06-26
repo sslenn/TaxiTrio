@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { MapPin } from 'lucide-react';
 
 // Fix default marker icon issue in Leaflet + Vite compilation
 delete L.Icon.Default.prototype._getIconUrl;
@@ -295,9 +296,10 @@ export default function MapPicker({ onSelectPickup, onSelectDropoff, onlyPickup 
                 key={idx}
                 type="button"
                 onClick={() => selectSearchResult(r)}
-                className="text-left text-[11px] p-2.5 hover:bg-neutral-900 text-neutral-300 hover:text-white transition duration-150 truncate"
+                className="text-left text-[11px] p-2.5 hover:bg-neutral-900 text-neutral-300 hover:text-white transition duration-150 flex items-center gap-1.5 w-full truncate"
               >
-                📍 {r.display_name}
+                <MapPin className="w-3.5 h-3.5 text-gold shrink-0" />
+                <span className="truncate">{r.display_name}</span>
               </button>
             ))}
           </div>

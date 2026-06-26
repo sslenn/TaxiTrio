@@ -1,6 +1,6 @@
 export default function EmptyState({ title = "No Data Available", message = "There is nothing to display here at the moment.", icon, action }) {
   return (
-    <div className="flex flex-col items-center justify-center text-center py-16 px-6 border border-gold/10 bg-[#121212] rounded-2xl">
+    <div className="flex flex-col items-center justify-center text-center py-20 px-6 card-luxury">
       {icon ? (
         <div className="text-gold mb-4">{icon}</div>
       ) : (
