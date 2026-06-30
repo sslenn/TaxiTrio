@@ -73,7 +73,9 @@ export default function ManagePayments() {
                 <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-3xl font-bold">✓</div>
                 <h3 className="text-xl font-bold text-white font-serif">Payment Receipt</h3>
                 <p className="text-neutral-500 text-[10px] uppercase tracking-widest font-semibold">
-                  {typeof preview === 'object' && preview.payment_method === 'Stripe' ? 'Stripe Card Settlement' : 'KHQR Payment Receipt'}
+                  {typeof preview === 'object' 
+                    ? `${preview.payment_method === 'Stripe' ? 'Stripe Card' : preview.payment_method === 'KHQR' ? 'KHQR Mobile' : preview.payment_method} Settlement`
+                    : 'Digital Payment Receipt'}
                 </p>
                 <div className="border-t border-b border-neutral-900/60 py-4 my-2 text-left text-xs flex flex-col gap-2.5 text-[#A3A3A3] font-light">
                   <div className="flex justify-between">

@@ -43,6 +43,7 @@ const createDriverShell = async ({ name, full_name, email, phone, license_number
   const token = crypto.randomBytes(32).toString('hex');
   const expires = new Date(Date.now() + 24 * 3600000);
 
+  // driver creatation 
   const driver = await User.create({
     full_name: driverName,
     email: normalizedEmail,
@@ -51,7 +52,7 @@ const createDriverShell = async ({ name, full_name, email, phone, license_number
     role: 'driver',
     password: null, // Password is null initially
     is_active: false,
-    status: 'pending_activation',
+    status: 'pending_activation',  // waiting for the driver to confirm and filling the passwords
     activation_token: token,
     token_expires_at: expires
   });

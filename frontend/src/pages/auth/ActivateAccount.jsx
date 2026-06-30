@@ -1,3 +1,9 @@
+//  • Frontend Interface:
+//   The ActivateAccount.jsx component in ActivateAccount.jsx manages the driver UI.
+//       • It extracts the  token  parameter from the activation link.
+//       • It provides input fields for the driver to enter and confirm their new password.
+//       • It submits the  token  and  password  via an API request to the endpoint  /auth/activate-driver .
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api from '../../lib/axios';

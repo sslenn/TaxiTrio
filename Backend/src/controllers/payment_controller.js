@@ -52,6 +52,11 @@ const simulateKHQR = async (req, res, next) => {
   catch (e) { next(e); }
 };
 
+const simulateABA = async (req, res, next) => {
+  try { res.json(successResponse('Payment simulated successfully', await paymentService.simulateABAPay(req.params.bookingId))); }
+  catch (e) { next(e); }
+};
+
 const getStatus = async (req, res, next) => {
   try {
     res.json(successResponse('Payment status fetched', await paymentService.getStatus(req.user.id, req.params.bookingId)));
@@ -70,4 +75,4 @@ const verifyStripePayment = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
-module.exports = { create, getAll, verify, reject, getCheckout, simulateKHQR, getStatus, createStripeSession, verifyStripePayment };
+module.exports = { create, getAll, verify, reject, getCheckout, simulateKHQR, simulateABA, getStatus, createStripeSession, verifyStripePayment };

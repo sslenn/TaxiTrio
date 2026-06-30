@@ -32,6 +32,7 @@ router.get('/payments/checkout/:bookingId/status', authenticate, authorize('trav
 router.post('/payments/checkout/:bookingId/stripe', authenticate, authorize('traveler'), ctrl.createStripeSession);
 router.post('/payments/checkout/:bookingId/stripe-verify', authenticate, authorize('traveler'), ctrl.verifyStripePayment);
 router.post('/payments/:bookingId/simulate-khqr-pay', authenticate, authorize('traveler'), ctrl.simulateKHQR);
+router.post('/payments/:bookingId/simulate-aba-pay', authenticate, authorize('traveler'), ctrl.simulateABA);
 
 router.get('/admin/payments', authenticate, authorize('admin'), ctrl.getAll);
 router.patch('/admin/payments/:id/verify', authenticate, authorize('admin'), ctrl.verify);

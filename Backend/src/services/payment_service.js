@@ -225,6 +225,81 @@ const simulateKHQRPay = async (bookingId) => {
   }
 };
 
+const simulateABAPay = async (bookingId) => {
+  const t = await sequelize.transaction();
+  try {
+    let payment = await PaymentRecord.findOne({ where: { booking_id: bookingId }, transaction: t });
+    if (!payment) {
+      const booking = await Booking.findByPk(bookingId, { transaction: t });
+      if (!booking) throw { status: 404, message: 'Booking not found' };
+      payment = await PaymentRecord.create({
+        booking_id: bookingId,
+        traveler_id: booking.traveler_id,
+        amount: booking.total_fare,
+        payment_method: 'ABA Bank',
+        status: 'pending'
+      }, { transaction: t });
+    } else if (payment.status === 'verified') {
+      throw { status: 400, message: 'Payment already verified' };
+    }
+
+    await payment.update({
+      payment_method: 'ABA Bank',
+      status: 'verified',
+      verified_at: new Date(),
+      proof_url: '/uploads/mock-aba-verified.png'
+    }, { transaction: t });
+
+    await Booking.update({ status: 'payment_verified' }, { where: { id: bookingId }, transaction: t });
+    await t.commit();
+
+    // Create system notification for all Admins & send Telegram Alert
+    try {
+      const { Notification, User } = require('../../models');
+      const traveler = await User.findByPk(payment.traveler_id);
+      const travelerName = traveler ? traveler.full_name : 'Traveler';
+
+      // Dispatch Telegram Notification
+      try {
+        const { sendTelegramAlert } = require('../utils/telegram');
+        sendTelegramAlert(
+          `✅ <b>Payment Received & Confirmed!</b>\n\n` +
+          `<b>Booking ID:</b> #${bookingId}\n` +
+          `<b>Traveler:</b> ${travelerName}\n` +
+          `<b>Method:</b> ABA Pay (Simulation)\n` +
+          `<b>Amount:</b> $${parseFloat(payment.amount).toFixed(2)}\n` +
+          `<b>Status:</b> PAID (Auto-Verified)`
+        );
+      } catch (teleErr) {
+        console.error('Failed to send Telegram alert for ABA simulation confirmation:', teleErr);
+      }
+
+      const admins = await User.findAll({ where: { role: 'admin' } });
+      for (const admin of admins) {
+        await Notification.create({
+          user_id: admin.id,
+          title: 'New Paid Booking (ABA Simulation)',
+          message: `Traveler ${travelerName} simulated payment of $${parseFloat(payment.amount).toFixed(2)} via ABA Bank for ride #${bookingId}.`
+        });
+      }
+    } catch (notifyErr) {
+      console.error('Failed to create admin notification during ABA simulation:', notifyErr);
+    }
+
+    try {
+      const bookingService = require('./booking_service');
+      await bookingService.autoDispatch(bookingId);
+    } catch (dispatchError) {
+      console.error('Auto dispatch error during ABA simulation:', dispatchError);
+    }
+
+    return payment;
+  } catch (e) {
+    await t.rollback();
+    throw e;
+  }
+};
+
 const createStripeSession = async (travelerId, bookingId) => {
   const stripeSecret = process.env.STRIPE_SECRET_KEY;
   if (!stripeSecret) {
@@ -341,4 +416,4 @@ const verifyStripePayment = async (travelerId, bookingId) => {
   }
 };
 
-module.exports = { create, getAll, verify, reject, getOrCreateCheckout, getStatus, simulateKHQRPay, createStripeSession, verifyStripePayment };
+module.exports = { create, getAll, verify, reject, getOrCreateCheckout, getStatus, simulateKHQRPay, simulateABAPay, createStripeSession, verifyStripePayment };

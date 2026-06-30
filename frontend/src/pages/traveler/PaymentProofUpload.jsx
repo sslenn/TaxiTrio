@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getCheckoutSession, createStripeSession, simulateKHQRPayment, initiateUnifiedPayment, getPaymentStatus } from '../../service/paymentService';
+import { getCheckoutSession, createStripeSession, simulateKHQRPayment, simulateABAPayment, initiateUnifiedPayment, getPaymentStatus } from '../../service/paymentService';
 import { cancelBooking } from '../../service/bookingService';
 import PageHeader from '../../components/PageHeader';
 import GoldButton from '../../components/GoldButton';
@@ -22,7 +22,7 @@ export default function PaymentProofUpload() {
   }, [bookingId]);
 
   useEffect(() => {
-    if (paymentMethod !== 'khqr' || !checkout || checkout.payment.status === 'verified') return;
+    if ((paymentMethod !== 'khqr' && paymentMethod !== 'aba') || !checkout || checkout.payment.status === 'verified') return;
 
     const intervalId = setInterval(async () => {
       try {
@@ -65,6 +65,20 @@ export default function PaymentProofUpload() {
       navigate(`/traveler/bookings/${bookingId}`);
     } catch (err) {
       setError(err.response?.data?.message || 'KHQR payment simulation failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleABAPay = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      await simulateABAPayment(bookingId);
+      alert('ABA Payment Simulated Successfully! Your booking status has been verified.');
+      navigate(`/traveler/bookings/${bookingId}`);
+    } catch (err) {
+      setError(err.response?.data?.message || 'ABA payment simulation failed');
     } finally {
       setLoading(false);
     }
@@ -135,7 +149,7 @@ export default function PaymentProofUpload() {
       <div className="flex bg-[#111111] p-1 border border-neutral-900 rounded-xl gap-1">
         <button
           onClick={() => setPaymentMethod('khqr')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition duration-300 ${
+          className={`flex-grow flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition duration-300 ${
             paymentMethod === 'khqr'
               ? 'bg-[#1D1D1D] border border-gold/20 text-gold shadow-md'
               : 'text-neutral-400 hover:text-white'
@@ -145,8 +159,19 @@ export default function PaymentProofUpload() {
           KHQR
         </button>
         <button
+          onClick={() => setPaymentMethod('aba')}
+          className={`flex-grow flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition duration-300 ${
+            paymentMethod === 'aba'
+              ? 'bg-[#1D1D1D] border border-gold/20 text-gold shadow-md'
+              : 'text-neutral-400 hover:text-white'
+          }`}
+        >
+          <QrCode className="w-3.5 h-3.5" />
+          ABA Pay
+        </button>
+        <button
           onClick={() => setPaymentMethod('stripe')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition duration-300 ${
+          className={`flex-grow flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition duration-300 ${
             paymentMethod === 'stripe'
               ? 'bg-[#1D1D1D] border border-gold/20 text-gold shadow-md'
               : 'text-neutral-400 hover:text-white'
@@ -157,7 +182,7 @@ export default function PaymentProofUpload() {
         </button>
         <button
           onClick={() => setPaymentMethod('cash')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition duration-300 ${
+          className={`flex-grow flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition duration-300 ${
             paymentMethod === 'cash'
               ? 'bg-[#1D1D1D] border border-gold/20 text-gold shadow-md'
               : 'text-neutral-400 hover:text-white'
@@ -259,6 +284,54 @@ export default function PaymentProofUpload() {
             >
               {loading ? 'Confirming payment...' : 'Simulate Bank App Payment'}
             </GoldButton>
+          </>
+        ) : paymentMethod === 'aba' ? (
+          <>
+            <div className="absolute -right-24 -top-24 w-48 h-48 rounded-full bg-blue-500/5 blur-3xl pointer-events-none"></div>
+
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 z-10">
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">ABA Pay Network</span>
+            </div>
+
+            <div className="text-center z-10 my-2">
+              <p className="text-[#A3A3A3] text-[10px] uppercase tracking-widest font-semibold">Amount to Pay</p>
+              <p className="text-4xl font-extrabold text-gold mt-1">${parseFloat(payment.amount).toFixed(2)}</p>
+            </div>
+
+            <div className="w-full border-t border-neutral-900 my-1 pt-4 text-xs flex flex-col gap-3 text-left text-[#A3A3A3] z-10 font-light font-sans">
+              <div className="flex justify-between items-center">
+                <span>Trip Type:</span>
+                <span className="capitalize text-white font-bold font-serif">{booking_type?.replace(/_/g, ' ')}</span>
+              </div>
+              <div className="flex justify-between items-start gap-4">
+                <span className="shrink-0">Route:</span>
+                <span className="text-white font-medium text-right max-w-[220px] line-clamp-2">{pickup_location} → {dropoff_location}</span>
+              </div>
+            </div>
+
+            {/* ABA Pay Presentation */}
+            <div className="bg-[#1a1a1a] border border-blue-500/25 p-5 rounded-2xl flex flex-col items-center gap-3.5 z-10 shadow-inner w-full text-center">
+              <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/25">
+                <QrCode className="w-6 h-6 text-blue-400" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <p className="text-white font-bold text-xs uppercase tracking-wide">ABA Mobile App Checkout</p>
+                <p className="text-[10px] text-neutral-400 font-light leading-relaxed max-w-[220px]">
+                  Confirm ABA Pay simulation or scan mock ABA QR code to verify your booking payment.
+                </p>
+              </div>
+            </div>
+
+            {/* Simulate payment helper */}
+            <button
+              type="button"
+              onClick={handleABAPay}
+              disabled={loading}
+              className="w-full py-3.5 mt-2 text-xs font-serif uppercase tracking-wider bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+            >
+              {loading ? 'Confirming payment...' : 'Simulate ABA Pay'}
+            </button>
           </>
         ) : (
           <>

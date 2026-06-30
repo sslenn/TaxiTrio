@@ -98,9 +98,12 @@ export default function BookingHistory() {
         travel_date: fState.travel_date,
         travel_time: fState.travel_time
       });
-      
+      const bookingId = res.data?.data?.bookingId;
       const sessionUrl = res.data?.data?.sessionUrl;
-      if (sessionUrl) {
+      if (bookingId) {
+        alert('Details saved! Redirecting to payment options...');
+        navigate(`/traveler/payment/${bookingId}`);
+      } else if (sessionUrl) {
         alert('Details saved! Redirecting to Stripe checkout to complete payment...');
         window.location.href = sessionUrl;
       } else {
@@ -389,7 +392,7 @@ export default function BookingHistory() {
                           onClick={() => handleConfirm(r.id)} 
                           className="px-5 py-2.5 self-start text-xs shadow-md mt-1 flex items-center gap-1.5"
                         >
-                          💳 Pay & Confirm with Card
+                          💳 Confirm details & Pay
                         </GoldButton>
                       </div>
                     );
