@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getUser, logout } from '../utils/auth';
+import { getUser } from '../utils/auth';
 import { useTranslation } from '../context/LanguageContext';
+import { useLogoutConfirm } from '../context/LogoutConfirmContext';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const user = getUser();
   const { t } = useTranslation();
+  const { confirmLogout } = useLogoutConfirm();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -19,8 +21,7 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = () => {
-    logout();
-    navigate('/login');
+    confirmLogout();
   };
 
   const handleBookNow = () => {

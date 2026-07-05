@@ -6,6 +6,7 @@ import StatusBadge from '../../components/StatusBadge';
 import GoldButton from '../../components/GoldButton';
 import EmptyState from '../../components/EmptyState';
 import MapPicker from '../../components/MapPicker';
+import { ArrowLeft } from 'lucide-react';
 
 export default function BookingHistory() {
   const navigate = useNavigate();
@@ -15,6 +16,8 @@ export default function BookingHistory() {
   const [loading, setLoading] = useState(true);
   const [confirmFormState, setConfirmFormState] = useState({});
   const [editingCustom, setEditingCustom] = useState({});
+  const [bookingsLimit, setBookingsLimit] = useState(5);
+  const [customLimit, setCustomLimit] = useState(5);
 
   const load = () => {
     setLoading(true);
@@ -127,6 +130,15 @@ export default function BookingHistory() {
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto">
+      {/* Back to Home Button */}
+      <button
+        onClick={() => navigate('/traveler')}
+        className="group flex w-fit items-center gap-2 text-sm text-neutral-400 hover:text-gold transition-colors duration-200"
+      >
+        <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
+        <span>Back to Home</span>
+      </button>
+
       <PageHeader 
         title="My Bookings" 
         subtitle="Manage and track your active and past Cambodian travels"
@@ -172,7 +184,7 @@ export default function BookingHistory() {
           />
         ) : (
           <div className="flex flex-col gap-4">
-            {bookings.map((b) => (
+            {bookings.slice(0, bookingsLimit).map((b) => (
               <div 
                 key={b.id} 
                 className="card border border-gold/15 bg-[#121212] p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-gold/30 transition duration-300 relative overflow-hidden"
@@ -228,6 +240,23 @@ export default function BookingHistory() {
                 </div>
               </div>
             ))}
+            
+            {bookings.length > 5 && (
+              <div className="flex justify-center pt-4">
+                <button
+                  onClick={() => {
+                    if (bookingsLimit >= bookings.length) {
+                      setBookingsLimit(5);
+                    } else {
+                      setBookingsLimit(prev => prev + 5);
+                    }
+                  }}
+                  className="px-6 py-2.5 bg-neutral-900 hover:bg-neutral-850 text-neutral-400 hover:text-white border border-neutral-850 hover:border-neutral-700 text-[11px] font-black tracking-widest uppercase rounded-full cursor-pointer transition active:scale-[0.98]"
+                >
+                  {bookingsLimit >= bookings.length ? 'See Less' : 'See More'}
+                </button>
+              </div>
+            )}
           </div>
         )
       ) : (
@@ -243,7 +272,7 @@ export default function BookingHistory() {
           />
         ) : (
           <div className="flex flex-col gap-4">
-            {customRequests.map((r) => (
+            {customRequests.slice(0, customLimit).map((r) => (
               <div 
                 key={r.id} 
                 className="card border border-gold/15 bg-[#121212] p-6 rounded-2xl flex flex-col md:flex-row md:items-start justify-between gap-6 hover:border-gold/30 transition duration-300 relative overflow-hidden"
@@ -254,7 +283,7 @@ export default function BookingHistory() {
                     <StatusBadge status={r.status} />
                   </div>
                   <p className="text-[#A3A3A3] text-sm font-light mt-0.5">
-                    {r.origin} <span className="text-gold/50 mx-1.5">→</span> {r.destination}
+                    {r.origin} {r.stops && r.stops.length > 0 ? `→ ${r.stops.join(' → ')} ` : ''}<span className="text-gold/50 mx-1.5">→</span> {r.destination}
                   </p>
                   <p className="text-[#555] text-xs font-semibold">
                     Date: {r.travel_date} {r.travel_time && `at ${r.travel_time}`} · Passengers: {r.passengers} pax
@@ -275,8 +304,7 @@ export default function BookingHistory() {
                   {r.status === 'approved' && r.traveler_response && !editingCustom[r.id] && (
                     <div className="text-xs text-neutral-400 mt-2 bg-emerald-950/10 p-3 rounded-xl border border-emerald-900/30 leading-relaxed max-w-lg relative z-10">
                       <span className="font-bold text-emerald-400 block mb-1">✓ Confirmed Details:</span>
-                      <p className="mb-0.5"><span className="text-neutral-500">Pickup Address:</span> {r.origin}</p>
-                      <p className="mb-0.5"><span className="text-neutral-500">Dropoff Address:</span> {r.destination}</p>
+                      <p className="mb-0.5"><span className="text-neutral-500">Route details:</span> {r.origin} {r.stops && r.stops.length > 0 ? `→ ${r.stops.join(' → ')} ` : ''}→ {r.destination}</p>
                       <p className="mb-0.5"><span className="text-neutral-500">Pickup Date/Time:</span> {r.travel_date} {r.travel_time && `at ${r.travel_time}`}</p>
                       {r.telegram_contact && <p className="mb-0.5"><span className="text-neutral-500">Telegram Username:</span> {r.telegram_contact}</p>}
                       {r.traveler_response && <p className="mb-2"><span className="text-neutral-500">Confirmation Notes:</span> {r.traveler_response}</p>}
@@ -431,6 +459,23 @@ export default function BookingHistory() {
                 </div>
               </div>
             ))}
+            
+            {customRequests.length > 5 && (
+              <div className="flex justify-center pt-4">
+                <button
+                  onClick={() => {
+                    if (customLimit >= customRequests.length) {
+                      setCustomLimit(5);
+                    } else {
+                      setCustomLimit(prev => prev + 5);
+                    }
+                  }}
+                  className="px-6 py-2.5 bg-neutral-900 hover:bg-neutral-850 text-neutral-400 hover:text-white border border-neutral-850 hover:border-neutral-700 text-[11px] font-black tracking-widest uppercase rounded-full cursor-pointer transition active:scale-[0.98]"
+                >
+                  {customLimit >= customRequests.length ? 'See Less' : 'See More'}
+                </button>
+              </div>
+            )}
           </div>
         )
       )}

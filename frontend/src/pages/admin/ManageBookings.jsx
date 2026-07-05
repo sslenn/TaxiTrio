@@ -8,6 +8,7 @@ export default function ManageBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [bookingsLimit, setBookingsLimit] = useState(5);
 
   const load = () => {
     getAdminBookings()
@@ -60,7 +61,7 @@ export default function ManageBookings() {
         />
       ) : (
         <div className="flex flex-col gap-4">
-          {filteredBookings.map((b) => (
+          {filteredBookings.slice(0, bookingsLimit).map((b) => (
             <div 
               key={b.id} 
               className="card border border-gold/15 bg-[#121212] p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-gold/30 transition duration-300 relative overflow-hidden"
@@ -100,6 +101,23 @@ export default function ManageBookings() {
               </div>
             </div>
           ))}
+
+          {filteredBookings.length > 5 && (
+            <div className="flex justify-center pt-4">
+              <button
+                onClick={() => {
+                  if (bookingsLimit >= filteredBookings.length) {
+                    setBookingsLimit(5);
+                  } else {
+                    setBookingsLimit(prev => prev + 5);
+                  }
+                }}
+                className="px-6 py-2.5 bg-neutral-900 hover:bg-neutral-850 text-neutral-400 hover:text-white border border-neutral-850 hover:border-neutral-700 text-[11px] font-black tracking-widest uppercase rounded-full cursor-pointer transition active:scale-[0.98]"
+              >
+                {bookingsLimit >= filteredBookings.length ? 'See Less' : 'See More'}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

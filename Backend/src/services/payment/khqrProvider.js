@@ -76,7 +76,7 @@ class KHQRProvider {
     
     if (!bookingId && description) {
       // Regex match to extract UUID v4 format from description (e.g. "Booking #f3e1a...")
-      const match = description.match(/#?([a-f0-9\-]{36})/i);
+      const match = description.match(/#?([a-f0-9-]{36})/i);
       if (match) {
         bookingId = match[1];
       } else {

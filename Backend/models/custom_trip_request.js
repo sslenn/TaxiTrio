@@ -18,6 +18,7 @@ const CustomTripRequest = sequelize.define('CustomTripRequest', {
   traveler_response: { type: DataTypes.TEXT },
   telegram_contact:  { type: DataTypes.STRING(100) },
   is_urgent_requested: { type: DataTypes.BOOLEAN, defaultValue: false },
+  stops: { type: DataTypes.JSON, defaultValue: [] },
 }, { underscored: true, tableName: 'custom_trip_requests' });
 
 module.exports = CustomTripRequest;

@@ -51,13 +51,13 @@ RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN
   IF NEW.status IS DISTINCT FROM OLD.status THEN
     IF NEW.status = 'verified' THEN
-      INSERT INTO notifications (user_id, title, message, created_at, updated_at)
+      INSERT INTO notifications (user_id, title, message, type, related_type, related_id, action_url, priority, created_at, updated_at)
       VALUES (NEW.traveler_id, 'Payment Verified',
-              'Your payment has been verified. Your booking is now being processed.', NOW(), NOW());
+              'Your payment has been verified. Your booking is now being processed.', 'PAYMENT_VERIFIED', 'Payment', NEW.id::text, '/traveler/bookings/' || NEW.booking_id, 'High', NOW(), NOW());
     ELSIF NEW.status = 'rejected' THEN
-      INSERT INTO notifications (user_id, title, message, created_at, updated_at)
+      INSERT INTO notifications (user_id, title, message, type, related_type, related_id, action_url, priority, created_at, updated_at)
       VALUES (NEW.traveler_id, 'Payment Rejected',
-              'Your payment was rejected. Please re-upload your proof of payment.', NOW(), NOW());
+              'Your payment was rejected. Please re-upload your proof of payment.', 'PAYMENT_REJECTED', 'Payment', NEW.id::text, '/traveler/bookings/' || NEW.booking_id, 'High', NOW(), NOW());
     END IF;
   END IF;
   RETURN NEW;
@@ -75,17 +75,17 @@ RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN
   IF NEW.status IS DISTINCT FROM OLD.status THEN
     IF NEW.status = 'accepted' THEN
-      INSERT INTO notifications (user_id, title, message, created_at, updated_at)
+      INSERT INTO notifications (user_id, title, message, type, related_type, related_id, action_url, priority, created_at, updated_at)
       VALUES (NEW.traveler_id, 'Driver Accepted',
-              'Your driver has accepted the booking. Get ready!', NOW(), NOW());
+              'Your driver has accepted the booking. Get ready!', 'DRIVER_ACCEPTED', 'Booking', NEW.id::text, '/traveler/bookings/' || NEW.id, 'High', NOW(), NOW());
     ELSIF NEW.status = 'rejected' THEN
-      INSERT INTO notifications (user_id, title, message, created_at, updated_at)
+      INSERT INTO notifications (user_id, title, message, type, related_type, related_id, action_url, priority, created_at, updated_at)
       VALUES (NEW.traveler_id, 'Driver Rejected',
-              'Your assigned driver has rejected the booking. We will reassign shortly.', NOW(), NOW());
+              'Your assigned driver has rejected the booking. We will reassign shortly.', 'DRIVER_REJECTED', 'Booking', NEW.id::text, '/traveler/bookings/' || NEW.id, 'High', NOW(), NOW());
     ELSIF NEW.status = 'completed' THEN
-      INSERT INTO notifications (user_id, title, message, created_at, updated_at)
+      INSERT INTO notifications (user_id, title, message, type, related_type, related_id, action_url, priority, created_at, updated_at)
       VALUES (NEW.traveler_id, 'Trip Completed',
-              'Your trip has been completed. Thank you for choosing TaxiTrio!', NOW(), NOW());
+              'Your trip has been completed. Thank you for choosing TaxiTrio!', 'TRIP_COMPLETED', 'Booking', NEW.id::text, '/traveler/bookings/' || NEW.id, 'Normal', NOW(), NOW());
     END IF;
   END IF;
   RETURN NEW;

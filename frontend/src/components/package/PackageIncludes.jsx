@@ -1,47 +1,48 @@
-import React from 'react';
+import { Check, X } from 'lucide-react';
 
 export default function PackageIncludes({ includedItems, excludedItems }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      {/* What's Included */}
-      {includedItems && includedItems.length > 0 && (
-        <div className="flex flex-col gap-4">
-          <h3 className="text-xl font-bold font-serif text-white uppercase tracking-wider relative pl-3 border-l-2 border-emerald-500 mb-2">
-            What's Included
-          </h3>
-          <div className="flex flex-col gap-3">
-            {includedItems.map((item, index) => (
-              <div 
-                key={index} 
-                className="bg-emerald-950/10 border border-emerald-900/20 p-4 rounded-xl flex items-center gap-3"
-              >
-                <span className="text-emerald-500 font-bold text-lg select-none">✓</span>
-                <span className="text-neutral-300 text-sm font-light">{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+    <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <IncludedList title="What's Included" items={includedItems} icon={Check} tone="emerald" />
+      <IncludedList title="What's Not Included" items={excludedItems} icon={X} tone="rose" />
+    </section>
+  );
+}
 
-      {/* What's Not Included */}
-      {excludedItems && excludedItems.length > 0 && (
-        <div className="flex flex-col gap-4">
-          <h3 className="text-xl font-bold font-serif text-white uppercase tracking-wider relative pl-3 border-l-2 border-rose-500 mb-2">
-            What's Not Included
-          </h3>
-          <div className="flex flex-col gap-3">
-            {excludedItems.map((item, index) => (
-              <div 
-                key={index} 
-                className="bg-rose-950/10 border border-rose-900/20 p-4 rounded-xl flex items-center gap-3"
-              >
-                <span className="text-rose-500 font-bold text-lg select-none">✗</span>
-                <span className="text-neutral-300 text-sm font-light">{item}</span>
-              </div>
-            ))}
+function IncludedList({ title, items = [], icon: Icon, tone }) {
+  if (!items.length) return null;
+
+  const styles =
+    tone === 'emerald'
+      ? {
+          border: 'border-emerald-500',
+          card: 'border-emerald-500/20 bg-emerald-950/10',
+          icon: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
+        }
+      : {
+          border: 'border-rose-500',
+          card: 'border-rose-500/20 bg-rose-950/10',
+          icon: 'border-rose-500/30 bg-rose-500/10 text-rose-400',
+        };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <h2 className={`border-l-2 pl-3 font-serif text-2xl font-bold text-white ${styles.border}`}>
+        {title}
+      </h2>
+      <div className="grid gap-3">
+        {items.map((item) => (
+          <div
+            key={item}
+            className={`flex items-center gap-3 rounded-2xl border p-4 ${styles.card}`}
+          >
+            <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ${styles.icon}`}>
+              <Icon className="h-4 w-4" />
+            </span>
+            <span className="text-sm font-light text-neutral-200">{item}</span>
           </div>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
 }

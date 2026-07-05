@@ -197,7 +197,12 @@ const handleWebhook = async (req, res) => {
               await Notification.create({
                 user_id: tripReq.traveler_id,
                 title: 'New Message from Admin',
-                message: `Admin sent a response about your custom trip from ${tripReq.origin} to ${tripReq.destination}: "${text}"`
+                message: `Admin sent a response about your custom trip from ${tripReq.origin} to ${tripReq.destination}: "${text}"`,
+                type: 'CUSTOM_TRIP_COUNTER_OFFER',
+                related_type: 'CustomTrip',
+                related_id: tripId.toString(),
+                action_url: `/traveler/custom-trip`,
+                priority: 'High'
               });
 
               // Confirm success in Telegram chat

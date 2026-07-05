@@ -8,6 +8,7 @@ const TransportationPackage = sequelize.define('TransportationPackage', {
   price:         { type: DataTypes.DECIMAL(10, 2), allowNull: false },
   duration_days: { type: DataTypes.INTEGER, allowNull: false },
   max_persons:   { type: DataTypes.INTEGER, allowNull: false },
+  image_url:     { type: DataTypes.STRING(255), allowNull: true },
   is_active:     { type: DataTypes.BOOLEAN, defaultValue: true },
 }, { underscored: true, tableName: 'transportation_packages' });
 

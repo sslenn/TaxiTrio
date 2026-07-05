@@ -16,6 +16,9 @@ const translations = {
     payments: "Payments",
     reports: "Reports",
     logout: "Logout",
+    logoutConfirmTitle: "Log Out?",
+    logoutConfirmMessage: "Are you sure you want to log out of your session? Any unsaved progress will be lost.",
+    cancelBtn: "Cancel",
     login: "Login",
     register: "Register",
     welcome: "Welcome",
@@ -105,6 +108,9 @@ const translations = {
     payments: "ការទូទាត់",
     reports: "របាយការណ៍",
     logout: "ចាកចេញ",
+    logoutConfirmTitle: "ចាកចេញ?",
+    logoutConfirmMessage: "តើអ្នកពិតជាចង់ចាកចេញពីគណនីមែនទេ?",
+    cancelBtn: "បោះបង់",
     login: "ចូលគណនី",
     register: "ចុះឈ្មោះ",
     welcome: "ស្វាគមន៍",
@@ -194,6 +200,9 @@ const translations = {
     payments: "付款审核",
     reports: "系统报告",
     logout: "退出登录",
+    logoutConfirmTitle: "确定要退出吗？",
+    logoutConfirmMessage: "退出登录后，您将需要重新登录才能访问您的账户。",
+    cancelBtn: "取消",
     login: "登录",
     register: "注册",
     welcome: "欢迎",
@@ -283,6 +292,9 @@ const translations = {
     payments: "결제 관리",
     reports: "분석 보고서",
     logout: "로그아웃",
+    logoutConfirmTitle: "로그아웃하시겠습니까?",
+    logoutConfirmMessage: "정말로 로그아웃하고 세션을 종료하시겠습니까?",
+    cancelBtn: "취소",
     login: "로그인",
     register: "회원가입",
     welcome: "환영합니다",
@@ -358,6 +370,11 @@ const translations = {
     legal: "법적 고지",
   },
 };
+
+// Register remaining 16 languages mapping to English as fallback
+['fr', 'es', 'de', 'it', 'pt', 'ru', 'ar', 'hi', 'id', 'ms', 'fil', 'lo', 'my', 'ja', 'th', 'vi'].forEach((lang) => {
+  translations[lang] = translations.en;
+});
 
 const LanguageContext = createContext();
 

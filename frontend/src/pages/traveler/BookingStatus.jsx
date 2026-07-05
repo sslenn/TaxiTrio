@@ -7,6 +7,7 @@ import PageHeader from '../../components/PageHeader';
 import GoldButton from '../../components/GoldButton';
 import StatusBadge from '../../components/StatusBadge';
 import DashboardCard from '../../components/DashboardCard';
+import { ArrowLeft } from 'lucide-react';
 
 export default function BookingStatus() {
   const { id } = useParams();
@@ -55,6 +56,15 @@ export default function BookingStatus() {
 
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-6">
+      {/* Back to Home Button */}
+      <button
+        onClick={() => navigate('/traveler')}
+        className="group flex w-fit items-center gap-2 text-sm text-neutral-400 hover:text-gold transition-colors duration-200"
+      >
+        <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
+        <span>Back to Home</span>
+      </button>
+
       <PageHeader 
         title="Booking Details" 
         subtitle={`Reference Trip ID: #${booking.id}`}

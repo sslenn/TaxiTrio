@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { logout, getUser } from '../utils/auth';
+import { getUser } from '../utils/auth';
+import { useLogoutConfirm } from '../context/LogoutConfirmContext';
 import NotificationBell from '../components/NotificationBell';
 import { useTranslation } from '../context/LanguageContext';
+import Footer from '../components/Footer';
 
 const links = [
   { to: '/driver', labelKey: 'dashboard', end: true },
@@ -17,6 +19,7 @@ export default function DriverLayout() {
   const navigate = useNavigate();
   const user = getUser();
   const { t } = useTranslation();
+  const { confirmLogout } = useLogoutConfirm();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -64,7 +67,7 @@ export default function DriverLayout() {
 
       {/* Sidebar Navigation */}
       <aside 
-        className={`w-64 bg-[#0E0E0E] border-r border-gold/10 flex flex-col p-6 gap-3 shrink-0 fixed inset-y-0 left-0 z-50 transition-transform duration-300 transform lg:translate-x-0 lg:relative lg:z-10 ${
+        className={`w-64 bg-[#0E0E0E] border-r border-gold/10 flex flex-col p-6 gap-3 shrink-0 fixed inset-y-0 left-0 z-50 transition-transform duration-300 transform lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:self-start lg:z-10 lg:overflow-y-auto ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
@@ -111,7 +114,7 @@ export default function DriverLayout() {
             <div className="min-w-0 flex-1">
               <p className="text-xs text-white font-bold truncate">{user?.full_name}</p>
               <button 
-                onClick={() => { logout(); navigate('/login'); }} 
+                onClick={confirmLogout} 
                 className="text-[10px] text-[#A3A3A3] hover:text-red-400 font-semibold transition mt-0.5 block uppercase tracking-wider"
               >
                 {t('logout')}
@@ -126,7 +129,12 @@ export default function DriverLayout() {
       </aside>
 
       {/* Main content viewport */}
-      <main className="flex-1 p-6 md:p-8 overflow-y-auto w-full max-w-7xl mx-auto"><Outlet /></main>
+      <main className="flex-1 flex flex-col justify-between overflow-y-auto min-h-screen">
+        <div className="p-6 md:p-8 w-full max-w-7xl mx-auto flex-1">
+          <Outlet />
+        </div>
+        <Footer />
+      </main>
     </div>
   );
 }

@@ -1,71 +1,96 @@
-import React from 'react';
-import { MapPin, Clock, Users, Map } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Calendar, Clock, Map, MapPin, Star, Users } from 'lucide-react';
+import GoldButton from '../GoldButton';
 
-export default function PackageHero({ name, description, durationDays, maxPersons, province, bannerImage }) {
+const fallbackImage = '/images/gallery_angkor1.jpg';
+
+export default function PackageHero({
+  name,
+  description,
+  durationDays,
+  maxPersons,
+  province,
+  destination,
+  bannerImage,
+  price,
+  rating,
+  onBookClick,
+}) {
+  const heroImage =
+    typeof bannerImage === 'string'
+      ? { src: bannerImage, alt: name }
+      : bannerImage || { src: fallbackImage, alt: name };
+
   return (
-    <div className="relative w-full h-[60vh] md:h-[70vh] min-h-[400px] overflow-hidden rounded-3xl border border-gold/15 shadow-2xl">
-      {/* Background Banner Image */}
+    <section className="relative min-h-[560px] w-full overflow-hidden rounded-2xl border border-white/10 shadow-2xl md:min-h-[660px]">
       <img
-        src={bannerImage || '/images/tour_package.jpg'}
-        alt={name}
-        className="absolute inset-0 w-full h-full object-cover select-none"
+        src={heroImage.src || fallbackImage}
+        alt={heroImage.alt || name}
+        loading="eager"
+        onError={(event) => {
+          event.currentTarget.src = fallbackImage;
+        }}
+        className="absolute inset-0 h-full w-full select-none object-cover"
       />
 
-      {/* Dark Premium Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0B] via-[#0B0B0B]/75 to-transparent"></div>
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0B0B0B] via-[#0B0B0B]/30 to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/70 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/55 to-transparent" />
 
-      {/* Content Container */}
-      <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12 gap-6 z-10 max-w-4xl">
-        <div className="flex flex-col gap-2">
-          {/* Destination Badge */}
-          {province && (
-            <span className="self-start text-[10px] md:text-xs font-bold uppercase tracking-widest text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/35 px-3.5 py-1.5 rounded-full shadow-[0_0_15px_rgba(212,175,55,0.08)] flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-[#D4AF37]" /> {province}
-            </span>
-          )}
-          
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white font-serif tracking-tight leading-tight mt-2 drop-shadow-lg">
+      <motion.div
+        initial={{ opacity: 0, y: 28 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.65 }}
+        className="absolute inset-x-0 bottom-0 z-10 flex flex-col gap-7 p-6 md:p-10 lg:p-12"
+      >
+        <div className="flex max-w-4xl flex-col gap-4">
+          <div className="flex flex-wrap gap-3">
+            {province && (
+              <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-black/55 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-gold backdrop-blur-md">
+                <MapPin className="h-3.5 w-3.5" />
+                {province}
+              </span>
+            )}
+            {destination && (
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/45 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-white backdrop-blur-md">
+                <Map className="h-3.5 w-3.5 text-gold" />
+                {destination}
+              </span>
+            )}
+          </div>
+
+          <h1 className="font-serif text-4xl font-black leading-[0.95] text-white md:text-6xl lg:text-7xl">
             {name}
           </h1>
-          
-          <p className="text-neutral-300 text-sm md:text-base font-light leading-relaxed max-w-2xl mt-1 drop-shadow-md">
+
+          <p className="max-w-3xl text-sm font-light leading-7 text-neutral-200 md:text-base">
             {description}
           </p>
         </div>
 
-        {/* Hero Metadata Info Cards */}
-        <div className="flex flex-wrap gap-4 mt-2">
-          {/* Duration Card */}
-          <div className="bg-[#151515]/85 backdrop-blur-md border border-gold/15 px-5 py-3 rounded-2xl flex items-center gap-3">
-            <Clock className="w-5 h-5 text-gold shrink-0" />
-            <div className="flex flex-col">
-              <span className="text-[9px] text-neutral-500 uppercase font-bold tracking-wider">Duration</span>
-              <span className="text-xs font-bold text-white mt-0.5">{durationDays} Day(s)</span>
-            </div>
-          </div>
-
-          {/* Group Size Card */}
-          <div className="bg-[#151515]/85 backdrop-blur-md border border-gold/15 px-5 py-3 rounded-2xl flex items-center gap-3">
-            <Users className="w-5 h-5 text-gold shrink-0" />
-            <div className="flex flex-col">
-              <span className="text-[9px] text-neutral-500 uppercase font-bold tracking-wider">Group Size</span>
-              <span className="text-xs font-bold text-white mt-0.5">Up to {maxPersons} Pax</span>
-            </div>
-          </div>
-
-          {/* Location Card */}
-          {province && (
-            <div className="bg-[#151515]/85 backdrop-blur-md border border-gold/15 px-5 py-3 rounded-2xl flex items-center gap-3">
-              <Map className="w-5 h-5 text-gold shrink-0" />
-              <div className="flex flex-col">
-                <span className="text-[9px] text-neutral-500 uppercase font-bold tracking-wider">Location</span>
-                <span className="text-xs font-bold text-white mt-0.5">{province}, Cambodia</span>
-              </div>
-            </div>
-          )}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <HeroMetric icon={Star} label="Rating" value={`${Number(rating || 4.9).toFixed(1)} / 5`} />
+          <HeroMetric icon={Clock} label="Duration" value={`${durationDays} ${durationDays === 1 ? 'Day' : 'Days'}`} />
+          <HeroMetric icon={Calendar} label="From" value={`$${Number(price || 0).toFixed(0)}`} />
+          <HeroMetric icon={Users} label="Capacity" value={`Up to ${maxPersons}`} />
+          <GoldButton onClick={onBookClick} className="h-full min-h-16 w-full">
+            Book Now
+          </GoldButton>
         </div>
-      </div>
+      </motion.div>
+    </section>
+  );
+}
+
+function HeroMetric({ icon: Icon, label, value }) {
+  return (
+    <div className="flex min-h-16 items-center gap-3 rounded-2xl border border-white/10 bg-black/55 px-4 py-3 backdrop-blur-md">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gold/25 bg-gold/10 text-gold">
+        <Icon className="h-4 w-4" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-[9px] font-black uppercase tracking-[0.22em] text-neutral-500">{label}</span>
+        <span className="block truncate text-sm font-bold text-white">{value}</span>
+      </span>
     </div>
   );
 }
