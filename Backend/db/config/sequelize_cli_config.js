@@ -1,3 +1,4 @@
+// Creating secure connection 
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
@@ -30,6 +31,7 @@ const dbConfig = process.env.DATABASE_URL
       } : {}
     };
 
+    //export configer so sequelize can use it 
 module.exports = {
   development: dbConfig,
   test: dbConfig,

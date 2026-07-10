@@ -1,3 +1,4 @@
+
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const { Sequelize } = require('sequelize');
@@ -43,3 +44,5 @@ if (process.env.DATABASE_URL) {
 }
 
 module.exports = sequelize;
+
+// Create and share database to whole project 
