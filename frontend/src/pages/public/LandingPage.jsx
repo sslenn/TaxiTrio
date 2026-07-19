@@ -5,6 +5,7 @@ import { getPublicVehicles } from '../../service/vehicleService';
 import { getUser } from '../../utils/auth';
 import Footer from '../../components/Footer';
 import { Car, Bus, Sparkles, Clock, Users } from 'lucide-react';
+import { useTranslation } from '../../context/LanguageContext';
 
 const VEHICLE_ICONS = {
   sedan: Car,
@@ -20,6 +21,7 @@ export default function LandingPage() {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const user = getUser();
+  const { locale } = useTranslation();
 
   useEffect(() => {
     Promise.all([getPackages(), getPublicVehicles()])
@@ -29,7 +31,7 @@ export default function LandingPage() {
       })
       .catch((err) => console.error('Failed to load public landing data:', err))
       .finally(() => setLoading(false));
-  }, []);
+  }, [locale]);
 
   const handleBookAction = (targetPath) => {
     if (user && user.role === 'traveler') {

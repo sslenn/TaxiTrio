@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from '../../context/LanguageContext';
 import { ArrowLeft, ArrowUpRight, ChevronRight, Home, MapPin } from 'lucide-react';
 import GoldButton from '../../components/GoldButton';
 import PackageBookingCard from '../../components/package/PackageBookingCard';
@@ -94,6 +95,7 @@ export default function PackageDetail() {
   const [tour, setTour] = useState(null);
   const [loading, setLoading] = useState(true);
   const showPublicHeader = !location.pathname.startsWith('/traveler');
+  const { locale } = useTranslation();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -121,7 +123,7 @@ export default function PackageDetail() {
       setTour(null);
       setLoading(false);
     }
-  }, [params]);
+  }, [params, locale]);
 
   if (loading) {
     return (

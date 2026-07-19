@@ -8,6 +8,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { getPackages } from '../../service/packageService';
 import { TOUR_CATEGORIES, cambodiaDestinations } from '../../data/cambodiaDestinations';
+import { useTranslation } from '../../context/LanguageContext';
 
 const slugify = (value) =>
   value
@@ -48,6 +49,7 @@ export default function PackageBooking() {
   const [destinationSearch, setDestinationSearch] = useState('');
   const [sortBy, setSortBy] = useState('popular');
   const [dbPackages, setDbPackages] = useState([]);
+  const { locale } = useTranslation();
 
   useEffect(() => {
     getPackages()
@@ -55,7 +57,7 @@ export default function PackageBooking() {
         setDbPackages(res.data?.data?.filter((p) => p.is_active) || []);
       })
       .catch((err) => console.error('Failed to load db packages:', err));
-  }, []);
+  }, [locale]);
 
   const filteredTours = useMemo(() => {
     const provinceQuery = provinceSearch.trim().toLowerCase();

@@ -2,9 +2,61 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { ArrowLeft, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '../../context/LanguageContext';
+import { termsTranslations } from './termsTranslations';
+import { useTranslatedDoc } from '../../utils/useTranslatedDoc';
 
 export default function TermsOfService() {
   const navigate = useNavigate();
+  const { locale } = useTranslation();
+
+  // Dynamically translate the document if the locale is not hardcoded
+  const dynamicDoc = useTranslatedDoc('terms', termsTranslations['en'], locale);
+
+  // Get active translation dictionary or fallback to dynamic translated / English
+  const tDoc = termsTranslations[locale] || dynamicDoc || termsTranslations['en'];
+
+  // Robust parsing to embed the Privacy Policy link in different languages
+  const renderPrivacyParagraph = () => {
+    const text = tDoc.privacy.text;
+    if (locale === 'km') {
+      const parts = text.split('គោលការណ៍ឯកជនភាព');
+      return (
+        <p>
+          {parts[0]}
+          <a href="/privacy" className="text-gold underline hover:text-[#e5c158] transition">គោលការណ៍ឯកជនភាព</a>
+          {parts[1]}
+        </p>
+      );
+    } else if (locale === 'zh') {
+      const parts = text.split('隐私政策');
+      return (
+        <p>
+          {parts[0]}
+          <a href="/privacy" className="text-gold underline hover:text-[#e5c158] transition">隐私政策</a>
+          {parts[1]}
+        </p>
+      );
+    } else if (locale === 'ko') {
+      const parts = text.split('개인정보 처리방침');
+      return (
+        <p>
+          {parts[0]}
+          <a href="/privacy" className="text-gold underline hover:text-[#e5c158] transition">개인정보 처리방침</a>
+          {parts[1]}
+        </p>
+      );
+    } else {
+      const parts = text.split('Privacy Policy');
+      return (
+        <p>
+          {parts[0]}
+          <a href="/privacy" className="text-gold underline hover:text-[#e5c158] transition">Privacy Policy</a>
+          {parts[1]}
+        </p>
+      );
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0B0B0B] text-white flex flex-col">
@@ -20,7 +72,7 @@ export default function TermsOfService() {
           className="group flex items-center gap-2 text-sm text-neutral-400 hover:text-gold mb-8 transition-colors duration-200"
         >
           <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
-          <span>Go Back</span>
+          <span>{tDoc.goBack}</span>
         </button>
 
         {/* Header */}
@@ -29,108 +81,97 @@ export default function TermsOfService() {
             <FileText className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-3xl md:text-4xl font-serif font-black text-white tracking-wide">Terms of Service</h1>
-            <p className="text-neutral-400 text-xs mt-1">Last Updated: July 5, 2026</p>
+            <h1 className="text-3xl md:text-4xl font-serif font-black text-white tracking-wide">{tDoc.title}</h1>
+            <p className="text-neutral-400 text-xs mt-1">{tDoc.lastUpdated}</p>
           </div>
         </div>
 
         {/* Content sections */}
         <div className="flex flex-col gap-8 text-neutral-300 text-sm leading-relaxed font-light relative z-10">
           
+          {/* Section 1: Acceptance of Terms */}
           <section className="flex flex-col gap-2.5">
             <h2 className="text-white font-serif font-bold text-lg uppercase tracking-wider text-gold border-l-2 border-gold pl-3">
-              1. Acceptance of Terms
+              {tDoc.acceptance.title}
             </h2>
-            <p>
-              By accessing, browsing, or using the TaxiTrio platform (including our website and booking systems), you acknowledge that you have read, understood, and agree to be bound by these Terms of Service. If you do not agree to these terms, you must not use or access our dispatching platform.
-            </p>
+            <p>{tDoc.acceptance.text}</p>
           </section>
 
+          {/* Section 2: Booking Policy */}
           <section className="flex flex-col gap-2.5">
             <h2 className="text-white font-serif font-bold text-lg uppercase tracking-wider text-gold border-l-2 border-gold pl-3">
-              2. Booking Policy
+              {tDoc.booking.title}
             </h2>
-            <p>
-              TaxiTrio operates as a digital transportation dispatching system in Cambodia. A booking is considered active once the traveler inputs route coordinates, selects a vehicle class, and completes the checkout verification process. While we strive to match all bookings with active drivers, matches depend on current vehicle availability in the fleet.
-            </p>
+            <p>{tDoc.booking.text}</p>
           </section>
 
+          {/* Section 3: User Responsibilities */}
           <section className="flex flex-col gap-2.5">
             <h2 className="text-white font-serif font-bold text-lg uppercase tracking-wider text-gold border-l-2 border-gold pl-3">
-              3. User Responsibilities
+              {tDoc.userResponsibility.title}
             </h2>
-            <p>
-              As a user of our platform, you agree to:
-            </p>
+            <p>{tDoc.userResponsibility.text}</p>
             <ul className="list-disc pl-5 flex flex-col gap-1.5 mt-1">
-              <li>Provide accurate pickup and dropoff location details.</li>
-              <li>Remain present at the specified pickup coordinates at the scheduled pickup time.</li>
-              <li>Treat dispatch chauffeurs with respect and refrain from illegal or hazardous activities during trips.</li>
-              <li>Maintain the security and secrecy of your Traveler Account password.</li>
+              {tDoc.userResponsibility.items.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
             </ul>
           </section>
 
+          {/* Section 4: Payment Terms */}
           <section className="flex flex-col gap-2.5">
             <h2 className="text-white font-serif font-bold text-lg uppercase tracking-wider text-gold border-l-2 border-gold pl-3">
-              4. Payment Terms
+              {tDoc.payment.title}
             </h2>
-            <p>
-              Fares are estimated dynamically for City Rides and set at fixed base prices for Intercity Routes. All bookings require a verified payment verification step. Users must upload a valid transfer receipt (e.g., ABA Bank receipt screenshot) to confirm booking verification. Fares are processed in US Dollars (USD).
-            </p>
+            <p>{tDoc.payment.text}</p>
           </section>
 
+          {/* Section 5: Cancellation Policy */}
           <section className="flex flex-col gap-2.5">
             <h2 className="text-white font-serif font-bold text-lg uppercase tracking-wider text-gold border-l-2 border-gold pl-3">
-              5. Cancellation Policy
+              {tDoc.cancellation.title}
             </h2>
-            <p>
-              Travelers can cancel bookings free of charge during the "Pending Payment" status phase. If a cancellation is requested after a payment is verified or after a chauffeur is dispatched, a cancellation fee may apply depending on route type. Refunds for payments are reviewed manually by administrative support staff.
-            </p>
+            <p>{tDoc.cancellation.text}</p>
           </section>
 
+          {/* Section 6: Driver Responsibilities */}
           <section className="flex flex-col gap-2.5">
             <h2 className="text-white font-serif font-bold text-lg uppercase tracking-wider text-gold border-l-2 border-gold pl-3">
-              6. Driver Responsibilities
+              {tDoc.driverResponsibility.title}
             </h2>
-            <p>
-              Designated fleet drivers are required to operate clean, safe, and licensed vehicles. Drivers must follow routes provided by the mapping systems and adhere to Cambodia's transport safety laws. Drivers reserve the right to decline passengers who act aggressively, are heavily intoxicated, or refuse to comply with standard safety laws.
-            </p>
+            <p>{tDoc.driverResponsibility.text}</p>
           </section>
 
+          {/* Section 7: Limitation of Liability */}
           <section className="flex flex-col gap-2.5">
             <h2 className="text-white font-serif font-bold text-lg uppercase tracking-wider text-gold border-l-2 border-gold pl-3">
-              7. Limitation of Liability
+              {tDoc.liability.title}
             </h2>
-            <p>
-              TaxiTrio operates as an intermediary dispatching software between travelers and private fleet drivers. To the extent permitted by law, TaxiTrio is not liable for indirect, incidental, special, or consequential damages resulting from rides, traffic delays, property loss, or road accidents.
-            </p>
+            <p>{tDoc.liability.text}</p>
           </section>
 
+          {/* Section 8: Privacy */}
           <section className="flex flex-col gap-2.5">
             <h2 className="text-white font-serif font-bold text-lg uppercase tracking-wider text-gold border-l-2 border-gold pl-3">
-              8. Privacy
+              {tDoc.privacy.title}
             </h2>
-            <p>
-              Your privacy is extremely important to us. Access and use of the platform are subject to our <a href="/privacy" className="text-gold underline hover:text-[#e5c158] transition">Privacy Policy</a>, which details how we collect, process, and protect your identity and geolocational coordinates.
-            </p>
+            {renderPrivacyParagraph()}
           </section>
 
+          {/* Section 9: Governing Law */}
           <section className="flex flex-col gap-2.5">
             <h2 className="text-white font-serif font-bold text-lg uppercase tracking-wider text-gold border-l-2 border-gold pl-3">
-              9. Governing Law
+              {tDoc.law.title}
             </h2>
-            <p>
-              These Terms of Service and any dispute arising from the use of our services shall be governed by and construed in accordance with the laws of the Kingdom of Cambodia, without regard to conflict of law principles.
-            </p>
+            <p>{tDoc.law.text}</p>
           </section>
 
+          {/* Section 10: Contact Information */}
           <section className="flex flex-col gap-2.5">
             <h2 className="text-white font-serif font-bold text-lg uppercase tracking-wider text-gold border-l-2 border-gold pl-3">
-              10. Contact Information
+              {tDoc.contact.title}
             </h2>
-            <p>
-              If you have any questions or require support regarding these Terms, please contact us on Telegram:
-            </p>
+            <p>{tDoc.contact.text}</p>
             <div className="flex gap-4 mt-2">
               <a 
                 href="https://t.me/sslenn8" 
@@ -138,7 +179,7 @@ export default function TermsOfService() {
                 rel="noopener noreferrer" 
                 className="px-4 py-2 rounded-xl bg-gold/10 border border-gold/20 text-gold text-xs font-bold hover:bg-gold/20 transition duration-150"
               >
-                General Support
+                {tDoc.contact.generalSupport}
               </a>
               <a 
                 href="https://t.me/kiki_moew_moew" 
@@ -146,7 +187,7 @@ export default function TermsOfService() {
                 rel="noopener noreferrer" 
                 className="px-4 py-2 rounded-xl bg-gold/10 border border-gold/20 text-gold text-xs font-bold hover:bg-gold/20 transition duration-150"
               >
-                Partnerships Support
+                {tDoc.contact.partnershipSupport}
               </a>
             </div>
           </section>

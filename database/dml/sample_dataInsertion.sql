@@ -27,11 +27,17 @@ INSERT INTO routes (id, origin, destination, distance_km, base_price, duration_h
 
 INSERT INTO transportation_packages (id, name, description, price, duration_days, max_persons) VALUES
   ('d1000000-0000-0000-0000-000000000001',
-   'Angkor Explorer', '2-day Siem Reap temple tour with private driver', 150.00, 2, 4),
+   '{"en": "Angkor Explorer", "km": "ដំណើរកម្សាន្តអង្គរ", "zh": "吴哥探险", "ko": "앙코르 탐험"}',
+   '{"en": "2-day Siem Reap temple tour with private driver", "km": "ដំណើរកម្សាន្តប្រាសាទសៀមរាប ២ ថ្ងៃ ជាមួយអ្នកបើកបរផ្ទាល់ខ្លួន", "zh": "2天暹粒寺庙私人司机之旅", "ko": "개인 운전기사 동반 2일 시엠립 사원 투어"}',
+   150.00, 2, 4),
   ('d1000000-0000-0000-0000-000000000002',
-   'Coastal Escape', '3-day Sihanoukville beach trip', 200.00, 3, 6),
+   '{"en": "Coastal Escape", "km": "ដំណើរកម្សាន្តតំបន់ឆ្នេរ", "zh": "海滨之旅", "ko": "코스탈 에스케이프"}',
+   '{"en": "3-day Sihanoukville beach trip", "km": "ដំណើរកម្សាន្តឆ្នេរសមុទ្រព្រះសីហនុ ៣ ថ្ងៃ", "zh": "3天西哈努克海滩之旅", "ko": "3일 시아누크빌 해변 여행"}',
+   200.00, 3, 6),
   ('d1000000-0000-0000-0000-000000000003',
-   'Kampot Riverside', '1-day Kampot scenic tour', 60.00, 1, 4);
+   '{"en": "Kampot Riverside", "km": "តំបន់មាត់ស្ទឹងកំពត", "zh": "贡布河畔", "ko": "캄포트 리버사이드"}',
+   '{"en": "1-day Kampot scenic tour", "km": "ដំណើរកម្សាន្តទេសភាពកំពត ១ ថ្ងៃ", "zh": "1天贡布观光之旅", "ko": "1일 캄포트 풍경 투어"}',
+   60.00, 1, 4);
 
 INSERT INTO bookings (id, traveler_id, driver_id, vehicle_id, route_id, booking_type, status, pickup_location, dropoff_location, pickup_time, total_fare) VALUES
   ('e1000000-0000-0000-0000-000000000001',
