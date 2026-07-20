@@ -38,7 +38,7 @@ TaxiTrio employs a decoupled, multi-tier architecture to separate presentation, 
                   │       Express.js (MVC / Service)         │
                   └────────────────────┬─────────────────────┘
                                        │
-                               Sequelize ORM
+                                 Sequelize ORM
                                        │
                   ┌────────────────────▼─────────────────────┐
                   │               DATABASE                   │
@@ -47,9 +47,9 @@ TaxiTrio employs a decoupled, multi-tier architecture to separate presentation, 
 ```
 
 ### Architectural Highlights
-* **Service-Oriented Backend**: Express routes delegate incoming requests to thin Controllers, which coordinate operations through dedicated Service layers ([`booking_service.js`](file:///C:/Users/PCN/OneDrive%20-%20Cambodia%20Academy%20of%20Digital%20Technology/CADT_Y2/Y2T3-Subjects/TaxiTrio/TaxiTrio/Backend/src/services/booking_service.js), [`auth_service.js`](file:///C:/Users/PCN/OneDrive%20-%20Cambodia%20Academy%20of%20Digital%20Technology/CADT_Y2/Y2T3-Subjects/TaxiTrio/TaxiTrio/Backend/src/services/auth_service.js)) rather than querying directly.
+* **Service-Oriented Backend**: Express routes delegate incoming requests to thin Controllers, which coordinate operations through dedicated Service layers ([booking_service.js](./Backend/src/services/booking_service.js), [auth_service.js](./Backend/src/services/auth_service.js)) rather than querying directly.
 * **Component-driven React UI**: Responsive components (Navbars, live widgets) styled in custom CSS, utilizing Vite proxy redirection to route frontend requests cleanly during development.
-* **Database Trigger Automations**: Uses PostgreSQL triggers ([`trigger.sql`](file:///C:/Users/PCN/OneDrive%20-%20Cambodia%20Academy%20of%20Digital%20Technology/CADT_Y2/Y2T3-Subjects/TaxiTrio/TaxiTrio/database/trigger/trigger.sql)) to automatically write logs to status history tables and notify travelers of status changes.
+* **Database Trigger Automations**: Uses PostgreSQL triggers ([trigger.sql](./database/trigger/trigger.sql)) to automatically write logs to status history tables and notify travelers of status changes.
 
 ---
 
@@ -75,7 +75,7 @@ To mitigate Session Hijacking, Cross-Site Scripting (XSS), and Cross-Site Reques
 * **Vertical Protection**: Middleware functions (`authorize('admin')`, `authorize('driver')`) intercept routes to block standard travelers from viewing administrative views.
 * **Horizontal Protection**: Service methods query resources based on user ownership. For instance, when Alice requests a booking detail page, the database validates `where traveler_id = Alice.id`, returning `404 Not Found` if she attempts to view Bob's booking ID.
 
-### C. 5-Role Database Privilege Architecture ([`role.sql`](file:///C:/Users/PCN/OneDrive%20-%20Cambodia%20Academy%20of%20Digital%20Technology/CADT_Y2/Y2T3-Subjects/TaxiTrio/TaxiTrio/database/role/role.sql))
+### C. 5-Role Database Privilege Architecture ([role.sql](./database/role/role.sql))
 The database enforces separation of operational concerns using 5 distinct roles:
 1. `taxitrio_owner`: Owns schema schemas and carries out setup.
 2. `taxitrio_admin`: DBA maintenance (table structure operations).
@@ -208,6 +208,8 @@ TaxiTrio/
 3. Install package configurations and start development server:
    ```bash
    npm install
+   ```
+   ```bash
    npm run dev
    ```
 

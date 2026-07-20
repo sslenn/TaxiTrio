@@ -3,6 +3,8 @@ import ProtectedRoute from './routes/ProtectedRoute';
 
 // Public Home Page
 import HomePage from './pages/public/HomePage';
+import PrivacyPolicy from './pages/public/PrivacyPolicy';
+import TermsOfService from './pages/public/TermsOfService';
 
 // Auth
 import Login from './pages/auth/Login';
@@ -50,6 +52,7 @@ import DriverLayout from './layouts/DriverLayout';
 import AdminLayout from './layouts/AdminLayout';
 import ThemeToggle from './components/ThemeToggle';
 import AuthInit from './components/AuthInit';
+import { LogoutConfirmProvider } from './context/LogoutConfirmContext';
 
 const Unauthorized = () => (
   <div className="flex items-center justify-center h-screen text-muted">
@@ -62,62 +65,73 @@ export default function App() {
     <BrowserRouter>
       <AuthInit>
         <ThemeToggle />
-        <Routes>
-          {/* Public */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/activate-account" element={<ActivateAccount />} />
-          <Route path="/unauthorized" element={<Unauthorized />} />
+        <LogoutConfirmProvider>
+          <Routes>
+            {/* Public */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/tours" element={<PackageBooking />} />
+            <Route path="/tours/:provinceSlug/:destinationSlug" element={<PackageDetail />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/activate-account" element={<ActivateAccount />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/city-ride" element={<Navigate to="/traveler/book/city" replace />} />
+            <Route path="/intercity-transfer" element={<Navigate to="/traveler/book/intercity" replace />} />
+            <Route path="/tour-package" element={<Navigate to="/traveler/book/package" replace />} />
+            <Route path="/custom-trip" element={<Navigate to="/traveler/custom-trip" replace />} />
 
-          {/* Traveler */}
-          <Route path="/traveler" element={
-            <ProtectedRoute roles={['traveler']}><TravelerLayout /></ProtectedRoute>
-          }>
-            <Route index element={<TravelerDashboard />} />
-            <Route path="services" element={<ServicesPage />} />
-            <Route path="book/city" element={<CityRideBooking />} />
-            <Route path="book/intercity" element={<IntercityBooking />} />
-            <Route path="book/package" element={<PackageBooking />} />
-            <Route path="packages/:id" element={<PackageDetail />} />
-            <Route path="custom-trip" element={<CustomTripRequest />} />
-            <Route path="bookings" element={<BookingHistory />} />
-            <Route path="bookings/:id" element={<BookingStatus />} />
-            <Route path="payment/:bookingId" element={<PaymentProofUpload />} />
-            <Route path="profile" element={<Profile />} />
-          </Route>
+            {/* Traveler */}
+            <Route path="/traveler" element={
+              <ProtectedRoute roles={['traveler']}><TravelerLayout /></ProtectedRoute>
+            }>
+              <Route index element={<TravelerDashboard />} />
+              <Route path="services" element={<ServicesPage />} />
+              <Route path="book/city" element={<CityRideBooking />} />
+              <Route path="book/intercity" element={<IntercityBooking />} />
+              <Route path="book/package" element={<PackageBooking />} />
+              <Route path="packages/:id" element={<PackageDetail />} />
+              <Route path="tours/:provinceSlug/:destinationSlug" element={<PackageDetail />} />
+              <Route path="custom-trip" element={<CustomTripRequest />} />
+              <Route path="bookings" element={<BookingHistory />} />
+              <Route path="bookings/:id" element={<BookingStatus />} />
+              <Route path="payment/:bookingId" element={<PaymentProofUpload />} />
+              <Route path="profile" element={<Profile />} />
+            </Route>
 
-          {/* Driver */}
-          <Route path="/driver" element={
-            <ProtectedRoute roles={['driver']}><DriverLayout /></ProtectedRoute>
-          }>
-            <Route index element={<DriverDashboard />} />
-            <Route path="bookings" element={<AssignedBookings />} />
-            <Route path="schedule" element={<TripSchedule />} />
-            <Route path="earnings" element={<Earnings />} />
-            <Route path="history" element={<TripHistory />} />
-            <Route path="profile" element={<Profile />} />
-          </Route>
+            {/* Driver */}
+            <Route path="/driver" element={
+              <ProtectedRoute roles={['driver']}><DriverLayout /></ProtectedRoute>
+            }>
+              <Route index element={<DriverDashboard />} />
+              <Route path="bookings" element={<AssignedBookings />} />
+              <Route path="schedule" element={<TripSchedule />} />
+              <Route path="earnings" element={<Earnings />} />
+              <Route path="history" element={<TripHistory />} />
+              <Route path="profile" element={<Profile />} />
+            </Route>
 
-          {/* Admin */}
-          <Route path="/admin" element={
-            <ProtectedRoute roles={['admin']}><AdminLayout /></ProtectedRoute>
-          }>
-            <Route index element={<AdminDashboard />} />
-            <Route path="users" element={<ManageUsers />} />
-            <Route path="users/:id" element={<UserDetails />} />
-            <Route path="drivers" element={<ManageDrivers />} />
-            <Route path="vehicles" element={<ManageVehicles />} />
-            <Route path="routes" element={<ManageRoutes />} />
-            <Route path="packages" element={<ManagePackages />} />
-            <Route path="bookings" element={<ManageBookings />} />
-            <Route path="payments" element={<ManagePayments />} />
-            <Route path="custom-requests" element={<ReviewCustomRequests />} />
-            <Route path="reports" element={<Reports />} />
-          </Route>
-        </Routes>
+            {/* Admin */}
+            <Route path="/admin" element={
+              <ProtectedRoute roles={['admin']}><AdminLayout /></ProtectedRoute>
+            }>
+              <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<ManageUsers />} />
+              <Route path="users/:id" element={<UserDetails />} />
+              <Route path="drivers" element={<ManageDrivers />} />
+              <Route path="vehicles" element={<ManageVehicles />} />
+              <Route path="routes" element={<ManageRoutes />} />
+              <Route path="packages" element={<ManagePackages />} />
+              <Route path="bookings" element={<ManageBookings />} />
+              <Route path="payments" element={<ManagePayments />} />
+              <Route path="custom-requests" element={<ReviewCustomRequests />} />
+              <Route path="reports" element={<Reports />} />
+            </Route>
+          </Routes>
+        </LogoutConfirmProvider>
       </AuthInit>
     </BrowserRouter>
   );

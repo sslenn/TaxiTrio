@@ -3,9 +3,6 @@ const sequelize = require('../db/config/db_config');
 const { encrypt, decrypt } = require('../src/utils/crypto');
 
 const encryptFields = (user) => {
-  if (user.changed('phone') && user.phone) {
-    user.phone = encrypt(user.phone);
-  }
   if (user.changed('license_number') && user.license_number) {
     user.license_number = encrypt(user.license_number);
   }

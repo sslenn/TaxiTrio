@@ -5,7 +5,7 @@ import GoldButton from '../../components/GoldButton';
 const services = [
   { title: 'City Ride', desc: 'Quick point-to-point rides around town. Perfect for airport transfers, hotel pickups, and local travel with fixed, transparent pricing.', to: '/traveler/book/city', img: '/images/city_ride.jpg' },
   { title: 'Intercity Transfer', desc: 'Comfortable private or shared transfers between Cambodia’s major destinations with professional, vetted drivers and reliable travel schedules.', to: '/traveler/book/intercity', img: '/images/intercity_transfer.jpg' },
-  { title: 'Tour Package', desc: 'Pre-planned multi-day curated travel packages. Explore top attractions and scenic routes without worrying about transportation details.', to: '/traveler/book/package', img: '/images/tour_package.jpg' },
+  { title: 'Tour Package', desc: 'Pre-planned multi-day curated travel packages. Explore top attractions and scenic routes without worrying about transportation details.', to: '/traveler/book/package', img: '/images/gallery_angkor1.jpg' },
   { title: 'Custom Trip', desc: 'Tailor your own itinerary. Hire a dedicated private driver and high-class vehicle for a completely customizable and flexible journey.', to: '/traveler/custom-trip', img: '/images/custom_trip.jpg' },
 ];
 

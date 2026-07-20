@@ -5,9 +5,34 @@ const create = async (req, res, next) => {
   try {
     const data = await customTripService.create(req.user.id, req.body);
     try {
-      const { User } = require('../../models');
+      const { User, Notification } = require('../../models');
       const user = await User.findByPk(req.user.id);
       const travelerName = user ? user.full_name : 'Unknown Traveler';
+
+      await Notification.create({
+        user_id: req.user.id,
+        title: 'Custom Trip Request Submitted',
+        message: `Your custom trip request from ${req.body.origin} to ${req.body.destination} has been submitted.`,
+        type: 'CUSTOM_TRIP_SUBMITTED',
+        related_type: 'CustomTrip',
+        related_id: data.id.toString(),
+        action_url: `/traveler/custom-trip`,
+        priority: 'Normal'
+      });
+
+      const admins = await User.findAll({ where: { role: 'admin' } });
+      for (const admin of admins) {
+        await Notification.create({
+          user_id: admin.id,
+          title: 'New Custom Trip Request',
+          message: `Traveler ${travelerName} submitted a new custom trip request from ${req.body.origin} to ${req.body.destination}.`,
+          type: 'CUSTOM_TRIP_SUBMITTED',
+          related_type: 'CustomTrip',
+          related_id: data.id.toString(),
+          action_url: `/admin/custom-requests`,
+          priority: 'High'
+        });
+      }
 
       const { sendTelegramAlert } = require('../utils/telegram');
       const formattedTimestamp = new Date().toLocaleString('en-US', { timeZone: 'Asia/Phnom_Penh' });
@@ -34,6 +59,7 @@ const create = async (req, res, next) => {
         `<b>Request ID:</b> #${data.id || 'N/A'}\n` +
         `<b>Traveler:</b> ${travelerName}\n` +
         `<b>Origin:</b> ${req.body.origin}\n` +
+        (req.body.stops && req.body.stops.length > 0 ? `<b>Stops:</b> ${req.body.stops.join(' → ')}\n` : '') +
         `<b>Destination:</b> ${req.body.destination}\n` +
         `<b>Date:</b> ${req.body.travel_date}\n` +
         (req.body.travel_time ? `<b>Time:</b> ${req.body.travel_time}\n` : '') +
@@ -76,7 +102,12 @@ const confirmRequest = async (req, res, next) => {
         await Notification.create({
           user_id: admin.id,
           title: 'Custom Trip Confirmed by Traveler',
-          message: `Traveler ${travelerName} has confirmed details. Booking #${data.bookingId} created. Telegram: ${req.body.telegram_contact || 'None'}.`
+          message: `Traveler ${travelerName} has confirmed details. Booking #${data.bookingId} created. Telegram: ${req.body.telegram_contact || 'None'}.`,
+          type: 'CUSTOM_TRIP_SUBMITTED',
+          related_type: 'Booking',
+          related_id: data.bookingId.toString(),
+          action_url: `/admin/bookings`,
+          priority: 'High'
         });
       }
 
@@ -100,7 +131,7 @@ const confirmRequest = async (req, res, next) => {
         `<b>Booking ID:</b> #${data.bookingId}\n` +
         `<b>Traveler:</b> ${travelerName}\n` +
         `<b>Telegram Username:</b> ${req.body.telegram_contact || 'N/A'}\n` +
-        `<b>Route:</b> ${customTrip.origin} → ${customTrip.destination}\n` +
+        `<b>Route:</b> ${customTrip.origin} ${customTrip.stops && customTrip.stops.length > 0 ? `→ ${customTrip.stops.join(' → ')} ` : ''}→ ${customTrip.destination}\n` +
         `<b>Date:</b> ${customTrip.travel_date}\n` +
         (customTrip.travel_time ? `<b>Time:</b> ${customTrip.travel_time}\n` : '') +
         `<b>Passengers:</b> ${customTrip.passengers} pax\n` +
@@ -130,7 +161,12 @@ const markUrgent = async (req, res, next) => {
         await Notification.create({
           user_id: admin.id,
           title: '🚨 URGENT support request',
-          message: `Traveler ${travelerName} requested urgent assistance for Custom Trip #${data.id.substring(0, 8)}. Telegram contact: ${data.telegram_contact || 'None'}.`
+          message: `Traveler ${travelerName} requested urgent assistance for Custom Trip #${data.id.substring(0, 8)}. Telegram contact: ${data.telegram_contact || 'None'}.`,
+          type: 'ADMIN_ALERT',
+          related_type: 'CustomTrip',
+          related_id: data.id.toString(),
+          action_url: `/admin/custom-requests`,
+          priority: 'Critical'
         });
       }
 

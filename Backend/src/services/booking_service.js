@@ -100,6 +100,18 @@ const create = async (travelerId, body) => {
   });
 
   await BookingStatusHistory.create({ booking_id: booking.id, status: 'pending_payment', changed_by: travelerId });
+
+  await Notification.create({
+    user_id: travelerId,
+    title: 'Booking Request Submitted',
+    message: `Your booking request #${booking.id} (${booking.booking_type.replace(/_/g, ' ').toUpperCase()}) has been successfully submitted.`,
+    type: 'BOOKING_CREATED',
+    related_type: 'Booking',
+    related_id: booking.id.toString(),
+    action_url: `/traveler/bookings/${booking.id}`,
+    priority: 'Normal'
+  });
+
   return booking;
 };
 
@@ -208,19 +220,57 @@ const autoDispatch = async (bookingId) => {
     await Notification.create({
       user_id: vehicle.driver_id,
       title: 'New Booking Assigned',
-      message: `You have been assigned to a new booking (${booking.booking_type}) from ${booking.pickup_location} to ${booking.dropoff_location}.`
+      message: `You have been assigned to a new booking (${booking.booking_type}) from ${booking.pickup_location} to ${booking.dropoff_location}.`,
+      type: 'DRIVER_ASSIGNED',
+      related_type: 'Booking',
+      related_id: booking.id.toString(),
+      action_url: `/driver/bookings`,
+      priority: 'High'
     });
 
     await Notification.create({
       user_id: booking.traveler_id,
       title: 'Driver Assigned',
-      message: `A driver has been assigned to your ride #${booking.id} (${booking.booking_type.replace(/_/g, ' ').toUpperCase()}).`
+      message: `A driver has been assigned to your ride #${booking.id} (${booking.booking_type.replace(/_/g, ' ').toUpperCase()}).`,
+      type: 'DRIVER_ASSIGNED',
+      related_type: 'Booking',
+      related_id: booking.id.toString(),
+      action_url: `/traveler/bookings/${booking.id}`,
+      priority: 'Normal'
     });
 
     console.log(`Booking ${bookingId} auto-assigned to driver ${vehicle.driver_id}`);
     return booking;
   } else {
     console.log(`No available driver/vehicle found for booking ${bookingId}`);
+    
+    // Notify traveler that we are searching / none found
+    await Notification.create({
+      user_id: booking.traveler_id,
+      title: 'Searching for Driver',
+      message: `No immediate drivers were available for your ride #${booking.id}. We are continuing to search.`,
+      type: 'DRIVER_SEARCHING',
+      related_type: 'Booking',
+      related_id: booking.id.toString(),
+      action_url: `/traveler/bookings/${booking.id}`,
+      priority: 'Normal'
+    });
+
+    // Notify administrators that booking cannot be auto-assigned
+    const admins = await User.findAll({ where: { role: 'admin' } });
+    for (const admin of admins) {
+      await Notification.create({
+        user_id: admin.id,
+        title: 'Auto-Assignment Failed',
+        message: `Booking #${booking.id} (${booking.booking_type}) could not be auto-assigned. No available drivers found.`,
+        type: 'ADMIN_ALERT',
+        related_type: 'Booking',
+        related_id: booking.id.toString(),
+        action_url: `/admin/bookings`,
+        priority: 'High'
+      });
+    }
+
     return null;
   }
 };
@@ -239,31 +289,56 @@ const updateDriverStatus = async (bookingId, driverId, status) => {
       await Notification.create({
         user_id: booking.traveler_id,
         title: 'Driver Accepted Ride',
-        message: `Your driver has accepted your ride #${bookingId}.`
+        message: `Your driver has accepted your ride #${bookingId}.`,
+        type: 'DRIVER_ACCEPTED',
+        related_type: 'Booking',
+        related_id: bookingId.toString(),
+        action_url: `/traveler/bookings/${bookingId}`,
+        priority: 'Normal'
       });
     } else if (status === 'en_route') {
       await Notification.create({
         user_id: booking.traveler_id,
         title: 'Driver En Route',
-        message: `Your driver is en route to your pickup location.`
+        message: `Your driver is en route to your pickup location.`,
+        type: 'DRIVER_EN_ROUTE',
+        related_type: 'Booking',
+        related_id: bookingId.toString(),
+        action_url: `/traveler/bookings/${bookingId}`,
+        priority: 'Normal'
       });
     } else if (status === 'arrived') {
       await Notification.create({
         user_id: booking.traveler_id,
         title: 'Driver Arrived',
-        message: `Your driver has arrived at the pickup location.`
+        message: `Your driver has arrived at the pickup location.`,
+        type: 'DRIVER_ARRIVED',
+        related_type: 'Booking',
+        related_id: bookingId.toString(),
+        action_url: `/traveler/bookings/${bookingId}`,
+        priority: 'High'
       });
     } else if (status === 'in_progress') {
       await Notification.create({
         user_id: booking.traveler_id,
         title: 'Trip Started',
-        message: `Your ride #${bookingId} has started. Have a safe journey!`
+        message: `Your ride #${bookingId} has started. Have a safe journey!`,
+        type: 'TRIP_STARTED',
+        related_type: 'Booking',
+        related_id: bookingId.toString(),
+        action_url: `/traveler/bookings/${bookingId}`,
+        priority: 'High'
       });
     } else if (status === 'completed') {
       await Notification.create({
         user_id: booking.traveler_id,
         title: 'Trip Completed',
-        message: `Your ride #${bookingId} is complete. Please rate your driver!`
+        message: `Your ride #${bookingId} is complete. Please rate your driver!`,
+        type: 'TRIP_COMPLETED',
+        related_type: 'Booking',
+        related_id: bookingId.toString(),
+        action_url: `/traveler/bookings/${bookingId}`,
+        priority: 'Normal'
       });
     }
   } catch (notifyErr) {
@@ -282,6 +357,11 @@ const updateDriverStatus = async (bookingId, driverId, status) => {
         user_id: admin.id,
         title: 'Driver Rejected Booking',
         message: `Driver ${driverName} rejected the booking (${booking.booking_type}) from ${booking.pickup_location} to ${booking.dropoff_location}. Manual re-assignment is needed.`,
+        type: 'DRIVER_REJECTED',
+        related_type: 'Booking',
+        related_id: bookingId.toString(),
+        action_url: `/admin/bookings`,
+        priority: 'High'
       });
     }
 

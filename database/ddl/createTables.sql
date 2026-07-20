@@ -287,8 +287,8 @@ CREATE TABLE public.routes (
 
 CREATE TABLE public.transportation_packages (
     id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
-    name character varying(150) NOT NULL,
-    description text,
+    name jsonb NOT NULL,
+    description jsonb,
     price numeric(10,2) NOT NULL,
     duration_days integer NOT NULL,
     max_persons integer NOT NULL,

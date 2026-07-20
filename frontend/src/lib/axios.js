@@ -9,6 +9,11 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = getToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  
+  // Sync chosen language with backend
+  const locale = localStorage.getItem('taxi-trio-locale') || 'en';
+  config.headers['Accept-Language'] = locale;
+
   return config;
 });
 

@@ -11,7 +11,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-export default function MapPicker({ onSelectPickup, onSelectDropoff, onlyPickup = false }) {
+export default function MapPicker({ onSelectPickup, onSelectDropoff, onlyPickup = false, pickupCoords = null, dropoffCoords = null }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const pickupMarker = useRef(null);
@@ -43,7 +43,8 @@ export default function MapPicker({ onSelectPickup, onSelectDropoff, onlyPickup 
             weight: 5,
             opacity: 0.85,
             lineCap: 'round',
-            lineJoin: 'round'
+            lineJoin: 'round',
+            className: 'leaflet-animated-route'
           }
         }).addTo(mapInstance.current);
 
@@ -74,6 +75,46 @@ export default function MapPicker({ onSelectPickup, onSelectDropoff, onlyPickup 
   useEffect(() => {
     handleMapClickRef.current = handleMapClick;
   });
+
+  const reverseGeocode = async (lat, lng) => {
+    setResolving(true);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+        {
+          headers: {
+            'User-Agent': 'TaxiTrio-App-Cambodia',
+          },
+        }
+      );
+      const data = await res.json();
+      setResolving(false);
+      return data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    } catch (err) {
+      console.error('Reverse geocoding error:', err);
+      setResolving(false);
+      return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    }
+  };
+
+  const handleMarkerDrag = async (lat, lng, type) => {
+    const address = await reverseGeocode(lat, lng);
+    if (type === 'pickup') {
+      setPickupAddr(address);
+      onSelectPickup(address, { lat, lng });
+      if (dropoffMarker.current) {
+        const dropoffLatLng = dropoffMarker.current.getLatLng();
+        drawRoute({ lat, lng }, dropoffLatLng);
+      }
+    } else {
+      setDropoffAddr(address);
+      if (onSelectDropoff) onSelectDropoff(address, { lat, lng });
+      if (pickupMarker.current) {
+        const pickupLatLng = pickupMarker.current.getLatLng();
+        drawRoute(pickupLatLng, { lat, lng });
+      }
+    }
+  };
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -107,26 +148,104 @@ export default function MapPicker({ onSelectPickup, onSelectDropoff, onlyPickup 
     };
   }, []);
 
-  const reverseGeocode = async (lat, lng) => {
-    setResolving(true);
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
-        {
-          headers: {
-            'User-Agent': 'TaxiTrio-App-Cambodia',
-          },
+  // Sync pickupCoords from parent
+  useEffect(() => {
+    if (!mapInstance.current) return;
+    if (pickupCoords) {
+      const { lat, lng } = pickupCoords;
+      if (pickupMarker.current) {
+        const currentLatLng = pickupMarker.current.getLatLng();
+        if (Math.abs(currentLatLng.lat - lat) > 0.00001 || Math.abs(currentLatLng.lng - lng) > 0.00001) {
+          pickupMarker.current.setLatLng([lat, lng]);
+          mapInstance.current.setView([lat, lng], 14);
         }
-      );
-      const data = await res.json();
-      setResolving(false);
-      return data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-    } catch (err) {
-      console.error('Reverse geocoding error:', err);
-      setResolving(false);
-      return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      } else {
+        const greenIcon = new L.Icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        });
+
+        pickupMarker.current = L.marker([lat, lng], { icon: greenIcon, draggable: true })
+          .addTo(mapInstance.current)
+          .bindPopup('Pickup Location')
+          .openPopup();
+
+        pickupMarker.current.on('dragend', async (event) => {
+          const marker = event.target;
+          const pos = marker.getLatLng();
+          await handleMarkerDrag(pos.lat, pos.lng, 'pickup');
+        });
+
+        mapInstance.current.setView([lat, lng], 14);
+      }
+
+      if (dropoffMarker.current) {
+        const dropoffLatLng = dropoffMarker.current.getLatLng();
+        drawRoute({ lat, lng }, dropoffLatLng);
+      }
+    } else {
+      if (pickupMarker.current) {
+        mapInstance.current.removeLayer(pickupMarker.current);
+        pickupMarker.current = null;
+      }
+      if (routeLayer.current) {
+        mapInstance.current.removeLayer(routeLayer.current);
+        routeLayer.current = null;
+      }
     }
-  };
+  }, [pickupCoords]);
+
+  // Sync dropoffCoords from parent
+  useEffect(() => {
+    if (!mapInstance.current || onlyPickup) return;
+    if (dropoffCoords) {
+      const { lat, lng } = dropoffCoords;
+      if (dropoffMarker.current) {
+        const currentLatLng = dropoffMarker.current.getLatLng();
+        if (Math.abs(currentLatLng.lat - lat) > 0.00001 || Math.abs(currentLatLng.lng - lng) > 0.00001) {
+          dropoffMarker.current.setLatLng([lat, lng]);
+        }
+      } else {
+        const redIcon = new L.Icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        });
+
+        dropoffMarker.current = L.marker([lat, lng], { icon: redIcon, draggable: true })
+          .addTo(mapInstance.current)
+          .bindPopup('Dropoff Location')
+          .openPopup();
+
+        dropoffMarker.current.on('dragend', async (event) => {
+          const marker = event.target;
+          const pos = marker.getLatLng();
+          await handleMarkerDrag(pos.lat, pos.lng, 'dropoff');
+        });
+      }
+
+      if (pickupMarker.current) {
+        const pickupLatLng = pickupMarker.current.getLatLng();
+        drawRoute(pickupLatLng, { lat, lng });
+      }
+    } else {
+      if (dropoffMarker.current) {
+        mapInstance.current.removeLayer(dropoffMarker.current);
+        dropoffMarker.current = null;
+      }
+      if (routeLayer.current) {
+        mapInstance.current.removeLayer(routeLayer.current);
+        routeLayer.current = null;
+      }
+    }
+  }, [dropoffCoords]);
 
   const handleMapClick = async (lat, lng) => {
     const address = await reverseGeocode(lat, lng);
@@ -147,10 +266,16 @@ export default function MapPicker({ onSelectPickup, onSelectDropoff, onlyPickup 
           shadowSize: [41, 41]
         });
 
-        pickupMarker.current = L.marker([lat, lng], { icon: greenIcon })
+        pickupMarker.current = L.marker([lat, lng], { icon: greenIcon, draggable: true })
           .addTo(mapInstance.current)
           .bindPopup('Pickup Location')
           .openPopup();
+
+        pickupMarker.current.on('dragend', async (event) => {
+          const marker = event.target;
+          const pos = marker.getLatLng();
+          await handleMarkerDrag(pos.lat, pos.lng, 'pickup');
+        });
       }
 
       if (!onlyPickup) {
@@ -177,10 +302,16 @@ export default function MapPicker({ onSelectPickup, onSelectDropoff, onlyPickup 
           shadowSize: [41, 41]
         });
 
-        dropoffMarker.current = L.marker([lat, lng], { icon: redIcon })
+        dropoffMarker.current = L.marker([lat, lng], { icon: redIcon, draggable: true })
           .addTo(mapInstance.current)
           .bindPopup('Dropoff Location')
           .openPopup();
+
+        dropoffMarker.current.on('dragend', async (event) => {
+          const marker = event.target;
+          const pos = marker.getLatLng();
+          await handleMarkerDrag(pos.lat, pos.lng, 'dropoff');
+        });
       }
 
       if (pickupMarker.current) {

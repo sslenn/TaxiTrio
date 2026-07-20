@@ -104,6 +104,11 @@ class PaymentService {
             user_id: admin.id,
             title: `New Paid Booking (${method.toUpperCase()})`,
             message: `Traveler ${travelerName} paid $${parseFloat(amount).toFixed(2)} via ${method.toUpperCase()} for ride #${bookingId}.`,
+            type: 'PAYMENT_VERIFIED',
+            related_type: 'Payment',
+            related_id: payment.id.toString(),
+            action_url: `/admin/payments`,
+            priority: 'Normal',
             created_at: new Date(),
             updated_at: new Date()
           });

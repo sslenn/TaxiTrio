@@ -7,7 +7,7 @@
   --color-accent-rgb: 212, 175, 55;
 }
 
-body {
+body, input, textarea, select, button, label {
   background-color: #0B0B0B;
   color: #FFFFFF;
   font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
@@ -345,3 +345,95 @@ body.light-theme input[type="datetime-local"]::-webkit-calendar-picker-indicator
 ::-webkit-scrollbar-thumb:hover {
   background: #D4AF37;
 }
+
+/* Animated Route Line on Leaflet */
+@keyframes route-dash {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+.leaflet-animated-route {
+  stroke-dasharray: 8, 12;
+  animation: route-dash 1.8s linear infinite;
+}
+
+/* Premium Footer Link Underline Animation */
+.footer-link-underline {
+  position: relative;
+  display: inline-block;
+}
+
+.footer-link-underline::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 1px;
+  bottom: -2px;
+  left: 0;
+  background-color: #D4AF37;
+  transform-origin: bottom right;
+  transition: transform 0.25s ease-out;
+}
+
+.footer-link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+/* Notification Micro-interactions */
+@keyframes ring {
+  0% { transform: rotate(0); }
+  10% { transform: rotate(15deg); }
+  20% { transform: rotate(-10deg); }
+  30% { transform: rotate(10deg); }
+  40% { transform: rotate(-7deg); }
+  50% { transform: rotate(5deg); }
+  60% { transform: rotate(-3deg); }
+  70% { transform: rotate(2deg); }
+  80% { transform: rotate(-1deg); }
+  90% { transform: rotate(1deg); }
+  100% { transform: rotate(0); }
+}
+
+.bell-ring-hover:hover svg {
+  animation: ring 0.8s ease;
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(212, 175, 55, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+}
+
+.pulse-glow-ring {
+  animation: pulse-glow 2s infinite;
+}
+
+.noti-item-hover {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.noti-item-hover:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Custom scrollbar for settings language picker */
+.custom-settings-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-settings-scrollbar::-webkit-scrollbar-track {
+  background: #0b0b0b;
+  border-radius: 4px;
+}
+.custom-settings-scrollbar::-webkit-scrollbar-thumb {
+  background: #BFA76A;
+  border-radius: 4px;
+}
+.custom-settings-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #cbb47c;
+}
+
+

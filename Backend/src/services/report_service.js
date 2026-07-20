@@ -2,7 +2,8 @@ const { fn, col, literal, Op, cast } = require('sequelize');
 const { Booking, User, Review, sequelize } = require('../../models');
 
 const getStats = async () => {
-  const [bookingStats, userStats, monthlyRevenue, topDrivers] = await Promise.all([
+  const [bookingStats, bookingList, userStats, monthlyRevenue, topDrivers] = await Promise.all([
+    // Aggregate counts
     Booking.findOne({
       attributes: [
         [fn('COUNT', col('Booking.id')), 'total'],
@@ -12,6 +13,16 @@ const getStats = async () => {
       ],
       raw: true,
     }),
+
+    // Full booking list for export (most recent 500)
+    Booking.findAll({
+      attributes: ['id', 'booking_type', 'status', 'pickup_location', 'dropoff_location', 'total_fare', 'created_at'],
+      order: [['created_at', 'DESC']],
+      limit: 500,
+      raw: true,
+    }),
+
+    // User role counts
     User.findOne({
       attributes: [
         [fn('COUNT', literal("CASE WHEN role='traveler' THEN 1 END")), 'travelers'],
@@ -19,6 +30,8 @@ const getStats = async () => {
       ],
       raw: true,
     }),
+
+    // Monthly revenue (last 12 months)
     Booking.findAll({
       attributes: [
         [fn('DATE_TRUNC', 'month', col('created_at')), 'month'],
@@ -30,12 +43,30 @@ const getStats = async () => {
       limit: 12,
       raw: true,
     }),
+
+    // Top drivers: avg rating, reviews, completed trips, revenue
     User.findAll({
       attributes: [
         'id',
         'full_name',
         [fn('ROUND', cast(fn('AVG', col('driverReviews.rating')), 'numeric'), 2), 'avg_rating'],
         [fn('COUNT', col('driverReviews.id')), 'reviews'],
+        [
+          literal(`(
+            SELECT COUNT(*) FROM bookings
+            WHERE bookings.driver_id = "User"."id"
+              AND bookings.status = 'completed'
+          )`),
+          'completed_bookings',
+        ],
+        [
+          literal(`(
+            SELECT COALESCE(SUM(total_fare), 0) FROM bookings
+            WHERE bookings.driver_id = "User"."id"
+              AND bookings.status = 'completed'
+          )`),
+          'revenue_generated',
+        ],
       ],
       include: [
         {
@@ -54,7 +85,12 @@ const getStats = async () => {
     }),
   ]);
 
-  return { bookings: bookingStats, users: userStats, monthly_revenue: monthlyRevenue, top_drivers: topDrivers };
+  return {
+    bookings: { ...bookingStats, list: bookingList },
+    users: userStats,
+    monthly_revenue: monthlyRevenue,
+    top_drivers: topDrivers,
+  };
 };
 
 module.exports = { getStats };

@@ -16,7 +16,12 @@ const create = async (travelerId, { booking_id, payment_method, proof_url }) => 
       await Notification.create({
         user_id: admin.id,
         title: 'New Payment Uploaded',
-        message: `Traveler ${travelerName} uploaded a receipt of $${parseFloat(booking.total_fare).toFixed(2)} for ride #${booking_id}. Verification pending.`
+        message: `Traveler ${travelerName} uploaded a receipt of $${parseFloat(booking.total_fare).toFixed(2)} for ride #${booking_id}. Verification pending.`,
+        type: 'PAYMENT_UPLOADED',
+        related_type: 'Payment',
+        related_id: payment.id.toString(),
+        action_url: `/admin/payments`,
+        priority: 'High'
       });
     }
   } catch (notifyErr) {
@@ -204,7 +209,12 @@ const simulateKHQRPay = async (bookingId) => {
         await Notification.create({
           user_id: admin.id,
           title: 'New Paid Booking (Simulation)',
-          message: `Traveler ${travelerName} simulated payment of $${parseFloat(payment.amount).toFixed(2)} for ride #${bookingId}.`
+          message: `Traveler ${travelerName} simulated payment of $${parseFloat(payment.amount).toFixed(2)} for ride #${bookingId}.`,
+          type: 'PAYMENT_VERIFIED',
+          related_type: 'Payment',
+          related_id: payment.id.toString(),
+          action_url: `/admin/payments`,
+          priority: 'Normal'
         });
       }
     } catch (notifyErr) {
@@ -279,7 +289,12 @@ const simulateABAPay = async (bookingId) => {
         await Notification.create({
           user_id: admin.id,
           title: 'New Paid Booking (ABA Simulation)',
-          message: `Traveler ${travelerName} simulated payment of $${parseFloat(payment.amount).toFixed(2)} via ABA Bank for ride #${bookingId}.`
+          message: `Traveler ${travelerName} simulated payment of $${parseFloat(payment.amount).toFixed(2)} via ABA Bank for ride #${bookingId}.`,
+          type: 'PAYMENT_VERIFIED',
+          related_type: 'Payment',
+          related_id: payment.id.toString(),
+          action_url: `/admin/payments`,
+          priority: 'Normal'
         });
       }
     } catch (notifyErr) {
@@ -395,7 +410,12 @@ const verifyStripePayment = async (travelerId, bookingId) => {
         await Notification.create({
           user_id: admin.id,
           title: 'New Paid Booking (Stripe)',
-          message: `Traveler ${travelerName} paid $${parseFloat(payment.amount).toFixed(2)} via Stripe for ride #${bookingId}.`
+          message: `Traveler ${travelerName} paid $${parseFloat(payment.amount).toFixed(2)} via Stripe for ride #${bookingId}.`,
+          type: 'PAYMENT_VERIFIED',
+          related_type: 'Payment',
+          related_id: payment.id.toString(),
+          action_url: `/admin/payments`,
+          priority: 'Normal'
         });
       }
     } catch (notifyErr) {

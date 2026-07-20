@@ -1,5 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { logout, getUser } from '../utils/auth';
+import { getUser } from '../utils/auth';
+import { useLogoutConfirm } from '../context/LogoutConfirmContext';
 import NotificationBell from '../components/NotificationBell';
 import { useTranslation } from '../context/LanguageContext';
 import Footer from '../components/Footer';
@@ -16,6 +17,7 @@ export default function TravelerLayout() {
   const navigate = useNavigate();
   const user = getUser();
   const { t } = useTranslation();
+  const { confirmLogout } = useLogoutConfirm();
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0B0B0B] text-white">
@@ -53,7 +55,7 @@ export default function TravelerLayout() {
               <span className="text-[#A3A3A3] font-medium hidden sm:inline">{user?.full_name}</span>
             </div>
             <button 
-              onClick={() => { logout(); navigate('/login'); }} 
+              onClick={confirmLogout} 
               className="text-[#A3A3A3] hover:text-red-400 font-semibold transition uppercase tracking-wider text-[10px] ml-1"
             >
               {t('logout')}

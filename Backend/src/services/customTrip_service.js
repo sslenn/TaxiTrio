@@ -1,4 +1,5 @@
 const { CustomTripRequest, User, Notification, Booking, BookingStatusHistory } = require('../../models');
+const { decrypt } = require('../utils/crypto');
 
 const create = async (travelerId, data) => {
   const existingPending = await CustomTripRequest.findOne({
@@ -7,14 +8,31 @@ const create = async (travelerId, data) => {
   if (existingPending) {
     throw { status: 400, message: 'You already have a pending custom trip request. Please wait for the administrator to review it.' };
   }
+  
+  if (data.telegram_contact) {
+    const user = await User.findByPk(travelerId);
+    if (user) {
+      await user.update({ phone: data.telegram_contact });
+    }
+  }
+  
   return CustomTripRequest.create({ ...data, traveler_id: travelerId });
 };
 
-const getAll = async () =>
-  CustomTripRequest.findAll({
+const getAll = async () => {
+  const requests = await CustomTripRequest.findAll({
     include: [{ model: User, as: 'traveler', attributes: ['full_name', 'phone'] }],
     order: [['created_at', 'DESC']],
   });
+  
+  requests.forEach(r => {
+    if (r.traveler && r.traveler.phone) {
+      r.traveler.phone = decrypt(r.traveler.phone);
+    }
+  });
+  
+  return requests;
+};
 
 const updateStatus = async (id, status, admin_note, quoted_price) => {
   const req = await CustomTripRequest.findByPk(id);
@@ -34,7 +52,12 @@ const updateStatus = async (id, status, admin_note, quoted_price) => {
     title: `Custom Trip Request ${status === 'approved' ? 'Approved' : 'Rejected'}`,
     message: `Your custom trip request from ${req.origin} to ${req.destination} has been ${status}.` +
       (status === 'approved' && quoted_price ? ` Quoted price: $${quoted_price}.` : '') +
-      (admin_note ? ` Note: ${admin_note}` : '')
+      (admin_note ? ` Note: ${admin_note}` : ''),
+    type: status === 'approved' ? 'CUSTOM_TRIP_APPROVED' : 'CUSTOM_TRIP_REJECTED',
+    related_type: 'CustomTrip',
+    related_id: req.id.toString(),
+    action_url: `/traveler/custom-trip`,
+    priority: 'High'
   });
 
   return req;
@@ -59,6 +82,7 @@ const confirmRequest = async (id, travelerId, { traveler_response, telegram_cont
   }
 
   // Create a new Booking in 'pending_payment' status
+  const stopsText = req.stops && req.stops.length > 0 ? ` (Stops: ${req.stops.join(' → ')})` : '';
   const booking = await Booking.create({
     traveler_id: travelerId,
     booking_type: 'intercity',
@@ -67,7 +91,7 @@ const confirmRequest = async (id, travelerId, { traveler_response, telegram_cont
     dropoff_location: destination,
     pickup_time: pickupTime,
     total_fare: req.quoted_price,
-    notes: `[Custom Trip] ` + (traveler_response || `Bespoke Custom Trip Request #${req.id}`)
+    notes: `[Custom Trip]${stopsText} ` + (traveler_response || `Bespoke Custom Trip Request #${req.id}`)
   });
 
   await BookingStatusHistory.create({
@@ -79,6 +103,13 @@ const confirmRequest = async (id, travelerId, { traveler_response, telegram_cont
   // Generate Stripe Checkout Session URL immediately for this booking
   const paymentService = require('./payment_service');
   const sessionRes = await paymentService.createStripeSession(travelerId, booking.id);
+
+  if (telegram_contact) {
+    const user = await User.findByPk(travelerId);
+    if (user) {
+      await user.update({ phone: telegram_contact });
+    }
+  }
 
   await req.update({ traveler_response, telegram_contact, origin, destination, travel_date, travel_time });
   
