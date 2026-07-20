@@ -1,0 +1,166 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "TaxiTrio API Documentation",
+    "version": "1.0.0",
+    "description": "API Specification for the TaxiTrio luxury transport and booking platform in Cambodia. Includes user authentication, ride dispatching, route optimization, and tour packages."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local Development Server"
+    }
+  ],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "description": "Registers a new traveler, driver, or admin account.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["full_name", "email", "phone", "password"],
+                "properties": {
+                  "full_name": { "type": "string", "example": "Sreylenn Seat" },
+                  "email": { "type": "string", "format": "email", "example": "sreylenn@cadt.edu.kh" },
+                  "phone": { "type": "string", "example": "085123456" },
+                  "password": { "type": "string", "format": "password", "example": "password123" },
+                  "role": { "type": "string", "enum": ["traveler", "driver"], "default": "traveler" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully"
+          },
+          "400": {
+            "description": "Validation error or user already exists"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "User authentication (Login)",
+        "description": "Authenticates a user and returns a JWT access token.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "sreylenn@cadt.edu.kh" },
+                  "password": { "type": "string", "format": "password", "example": "password123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "accessToken": { "type": "string" },
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "string" },
+                            "full_name": { "type": "string" },
+                            "email": { "type": "string" },
+                            "role": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/api/packages": {
+      "get": {
+        "summary": "Fetch active transportation packages",
+        "description": "Returns a list of all active multi-day tour packages, dynamically translated based on the Accept-Language header.",
+        "parameters": [
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "required": false,
+            "schema": { "type": "string", "default": "en" },
+            "description": "Language preference code (e.g. km, zh, ko)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of packages retrieved successfully"
+          }
+        }
+      }
+    },
+    "/api/admin/packages": {
+      "post": {
+        "summary": "Create a new package (Admin only)",
+        "description": "Creates a new tour package and auto-translates its name and description.",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "price", "duration_days", "max_persons"],
+                "properties": {
+                  "name": { "type": "string", "example": "Angkor Wat Adventure" },
+                  "description": { "type": "string", "example": "3-day private driver Siem Reap tour." },
+                  "price": { "type": "number", "example": 220.00 },
+                  "duration_days": { "type": "integer", "example": 3 },
+                  "max_persons": { "type": "integer", "example": 4 },
+                  "image": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Package created and translated successfully"
+          },
+          "403": {
+            "description": "Access denied (non-admin)"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

@@ -5,6 +5,7 @@ import PageHeader from '../../components/PageHeader';
 import GoldButton from '../../components/GoldButton';
 import TourCard from '../../components/tour/TourCard';
 import { cambodiaDestinations } from '../../data/cambodiaDestinations';
+import { useTranslation } from '../../context/LanguageContext';
 
 const empty = { name: '', description: '', price: '', duration_days: 1, max_persons: 4, province: '' };
 
@@ -23,9 +24,10 @@ export default function ManagePackages() {
   const [imagePreview, setImagePreview] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState('');
+  const { locale } = useTranslation();
 
   const load = () => getPackages().then((r) => setPackages(r.data.data));
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [locale]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];

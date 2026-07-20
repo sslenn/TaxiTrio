@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 const translations = {
   en: {
@@ -380,6 +380,8 @@ const LanguageContext = createContext();
 
 export function LanguageProvider({ children }) {
   const [locale, setLocale] = useState('en');
+  const [dynamicTranslations, setDynamicTranslations] = useState({});
+  const pendingRequests = useRef(new Set());
 
   useEffect(() => {
     const saved = localStorage.getItem('taxi-trio-locale');
@@ -395,8 +397,51 @@ export function LanguageProvider({ children }) {
     }
   };
 
+  const triggerTranslation = async (targetLang, key, englishText) => {
+    const requestKey = `${targetLang}:${key}`;
+    if (pendingRequests.current.has(requestKey)) return;
+    pendingRequests.current.add(requestKey);
+
+    try {
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(englishText)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data && data[0] && data[0][0] && data[0][0][0]) {
+        const translatedText = data[0][0][0];
+        setDynamicTranslations((prev) => ({
+          ...prev,
+          [targetLang]: {
+            ...prev[targetLang],
+            [key]: translatedText,
+          },
+        }));
+      }
+    } catch (err) {
+      console.warn(`Translation failed for "${key}" to "${targetLang}":`, err);
+    } finally {
+      pendingRequests.current.delete(requestKey);
+    }
+  };
+
   const t = (key, fallback = '') => {
-    return translations[locale]?.[key] || translations['en']?.[key] || fallback || key;
+    const hardcodedLocales = ['en', 'km', 'zh', 'ko'];
+    const isHardcoded = hardcodedLocales.includes(locale);
+    const englishText = translations['en']?.[key] || fallback || key;
+
+    if (isHardcoded) {
+      return translations[locale]?.[key] || englishText;
+    }
+
+    // Check if we have already fetched this key for the current locale
+    if (dynamicTranslations[locale]?.[key]) {
+      return dynamicTranslations[locale][key];
+    }
+
+    // Trigger async translation fetch
+    triggerTranslation(locale, key, englishText);
+
+    // Return English text as placeholder while translating
+    return englishText;
   };
 
   return (
@@ -409,3 +454,4 @@ export function LanguageProvider({ children }) {
 export function useTranslation() {
   return useContext(LanguageContext);
 }
+

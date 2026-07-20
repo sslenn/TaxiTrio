@@ -5,5 +5,6 @@ const validate = require('../middlewares/validate_middleware');
 const { reviewRules } = require('../utils/validator');
 
 router.post('/reviews', authenticate, authorize('traveler'), reviewRules, validate, ctrl.create);
+router.get('/reviews/my-reviews', authenticate, authorize('traveler'), ctrl.getMyReviews);
 
 module.exports = router;
